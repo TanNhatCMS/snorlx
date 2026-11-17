@@ -314,6 +314,32 @@ Webhooks deliver changes the instant GitHub reports them and let the poller answ
 
 With webhooks on every repository you can lengthen `RUN_POLL_INTERVAL` or set it to `0` to rely on webhooks and manual refresh only.
 
+## Log archive
+
+Snorlx can keep job logs forever. When enabled, a completed job's log is downloaded once and
+stored gzip-compressed in the storage backend, so dashboard history survives GitHub's own
+90-day log retention — the log stays viewable even after GitHub deletes it.
+
+- `LOG_ARCHIVE_ENABLED` (default `true`) turns the archiver on.
+- `LOG_ARCHIVE_MAX_SIZE_BYTES` (default 50 MB) caps one uncompressed job log; larger logs are
+  skipped so a runaway job cannot blow up storage.
+
+`GET /api/jobs/{id}/logs` returns the local content URL when the log is archived (same
+`{url}` response shape as before), falling back to the GitHub signed URL otherwise. The
+archived content is served as plain text by `GET /api/jobs/{id}/logs/content`.
+
+Runs completed before the feature was enabled can be backfilled while GitHub still has their
+logs (90 days at most):
+
+```bash
+curl -X POST -H "Authorization: Bearer <api-token>" http://localhost:8080/api/repositories/<id>/backfill-logs
+# {"archived":123,"failed":0,"scanned":45}
+```
+
+The endpoint walks the repository's completed runs within GitHub's retention window, skips
+already archived jobs, and processes at most 500 runs per call — call it again for the next
+slice.
+
 ## Configuration
 
 ### Environment Variables
