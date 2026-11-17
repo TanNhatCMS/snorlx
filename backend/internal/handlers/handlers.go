@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -1569,6 +1570,15 @@ func (h *Handler) GetJobLogs(w http.ResponseWriter, r *http.Request) {
 	// Get the run to find the repo and verify access
 	run, ok := h.loadAccessibleRun(w, r, user, job.RunID)
 	if !ok {
+		return
+	}
+
+	// An archived log wins: it survives GitHub's 90-day log retention, and the shape of the
+	// response stays {url} so the frontend needs no change.
+	if archived, err := h.storage.HasJobLog(r.Context(), job.ID); err == nil && archived {
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"url": fmt.Sprintf("/api/jobs/%d/logs/content", job.ID),
+		})
 		return
 	}
 

@@ -50,10 +50,12 @@ type mockStorage struct {
 	getRepoByGitHubIDFunc       func(ctx context.Context, githubID int64) (*models.Repository, error)
 
 	// Job log archive hooks
-	saveJobLogFunc        func(ctx context.Context, entry *models.JobLog) error
-	hasJobLogFunc         func(ctx context.Context, jobID int) (bool, error)
-	getJobLogFunc         func(ctx context.Context, jobID int) (*models.JobLog, error)
+	saveJobLogFunc          func(ctx context.Context, entry *models.JobLog) error
+	hasJobLogFunc           func(ctx context.Context, jobID int) (bool, error)
+	getJobLogFunc           func(ctx context.Context, jobID int) (*models.JobLog, error)
 	listJobsMissingLogsFunc func(ctx context.Context, repoID int, limit int) ([]models.WorkflowJob, error)
+	getJobFunc              func(ctx context.Context, id int) (*models.WorkflowJob, error)
+	listRunsFunc            func(ctx context.Context, userID int, filters *models.RunFilters, page, pageSize int) ([]models.WorkflowRun, int, error)
 }
 
 func (m *mockStorage) Close() error   { return nil }
@@ -164,6 +166,9 @@ func (m *mockStorage) UpdateWorkflow(ctx context.Context, id int, workflow *mode
 	return workflow, nil
 }
 func (m *mockStorage) ListRuns(ctx context.Context, userID int, filters *models.RunFilters, page, pageSize int) ([]models.WorkflowRun, int, error) {
+	if m.listRunsFunc != nil {
+		return m.listRunsFunc(ctx, userID, filters, page, pageSize)
+	}
 	return nil, 0, nil
 }
 func (m *mockStorage) GetRun(ctx context.Context, id int) (*models.WorkflowRun, error) {
@@ -191,7 +196,10 @@ func (m *mockStorage) ListJobsForRun(ctx context.Context, runID int) ([]models.W
 	return nil, nil
 }
 func (m *mockStorage) GetJob(ctx context.Context, id int) (*models.WorkflowJob, error) {
-	return nil, nil
+	if m.getJobFunc != nil {
+		return m.getJobFunc(ctx, id)
+	}
+	return nil, errors.New("job not found")
 }
 func (m *mockStorage) UpsertJob(ctx context.Context, job *models.WorkflowJob) (*models.WorkflowJob, error) {
 	if m.upsertJobFunc != nil {

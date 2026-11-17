@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"snorlx/backend/internal/models"
 
+	"github.com/go-chi/chi/v5"
 	gh "github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
@@ -179,4 +182,132 @@ func (h *Handler) archiveRunJobsAsync(repoFullName string, run models.WorkflowRu
 				Msg("Log archive: run pass failed")
 		}
 	}()
+}
+
+// ===== HTTP endpoints =====
+
+const (
+	// backfillRetentionDays matches GitHub's longest log retention window: logs of runs older
+	// than this are already gone from GitHub and cannot be recovered.
+	backfillRetentionDays = 90
+	// backfillMaxRuns bounds one backfill call so a huge repository cannot hammer the GitHub
+	// API within a single request; call the endpoint again for the next slice.
+	backfillMaxRuns = 500
+	// backfillPageSize is how many runs one ListRuns page holds.
+	backfillPageSize = 50
+)
+
+// GetJobLogContent serves an archived job log as plain text. Auth and access checks mirror
+// GetJobLogs so archived and live logs are exposed identically.
+func (h *Handler) GetJobLogContent(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	user := h.getUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	job, err := h.storage.GetJob(r.Context(), id)
+	if err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if _, ok := h.loadAccessibleRun(w, r, user, job.RunID); !ok {
+		return
+	}
+	entry, err := h.storage.GetJobLog(r.Context(), job.ID)
+	if err != nil {
+		http.Error(w, "Log not archived", http.StatusNotFound)
+		return
+	}
+	body, err := decompressLog(entry.Content)
+	if err != nil {
+		log.Error().Err(err).Int("job_id", job.ID).Msg("Log archive: corrupt stored log")
+		http.Error(w, "Corrupt archived log", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write(body)
+}
+
+// BackfillRepositoryLogs archives the job logs of the repository's completed runs within
+// GitHub's retention window. It is safe to call repeatedly: already archived jobs are skipped,
+// and one call processes at most backfillMaxRuns runs.
+func (h *Handler) BackfillRepositoryLogs(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	user := h.getUserFromContext(r.Context())
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	repo, err := h.storage.GetRepository(r.Context(), id)
+	if err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	if ok, err := h.storage.HasRepositoryAccess(r.Context(), user.ID, id); err != nil || !ok {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	owner, repoName, ok := splitFullName(repo.FullName)
+	if !ok {
+		http.Error(w, "Invalid repository name", http.StatusInternalServerError)
+		return
+	}
+	client := h.ghClient.GetUserClient(r.Context(), &oauth2.Token{AccessToken: user.AccessToken})
+	if client == nil {
+		http.Error(w, "Failed to build GitHub client", http.StatusInternalServerError)
+		return
+	}
+
+	archived, failed, scanned := 0, 0, 0
+	filters := &models.RunFilters{RepoID: id, StartDate: time.Now().AddDate(0, 0, -backfillRetentionDays)}
+	for page := 1; scanned < backfillMaxRuns; page++ {
+		runs, total, err := h.storage.ListRuns(r.Context(), user.ID, filters, page, backfillPageSize)
+		if err != nil {
+			http.Error(w, "Failed to list runs", http.StatusInternalServerError)
+			return
+		}
+		if len(runs) == 0 {
+			break
+		}
+		for i := range runs {
+			run := runs[i]
+			if run.Status != "completed" {
+				continue
+			}
+			scanned++
+			jobs, err := h.storage.ListJobsForRun(r.Context(), run.ID)
+			if err != nil {
+				failed++
+				log.Warn().Err(err).Int64("run_github_id", run.GitHubID).
+					Msg("Log archive: backfill could not list jobs")
+				continue
+			}
+			for _, job := range jobs {
+				stored, err := h.fetchAndStoreJobLog(r.Context(), client, owner, repoName, job)
+				if err != nil {
+					failed++
+					log.Warn().Err(err).Int64("job_github_id", job.GitHubID).
+						Msg("Log archive: backfill failed to archive job log")
+					continue
+				}
+				if stored {
+					archived++
+				}
+			}
+			if scanned >= backfillMaxRuns {
+				break
+			}
+		}
+		if page*backfillPageSize >= total {
+			break
+		}
+	}
+	log.Info().Int("repo_id", id).Int("archived", archived).Int("failed", failed).
+		Int("scanned", scanned).Msg("Log archive: backfill pass finished")
+	_ = json.NewEncoder(w).Encode(map[string]int{
+		"archived": archived,
+		"failed":   failed,
+		"scanned":  scanned,
+	})
 }

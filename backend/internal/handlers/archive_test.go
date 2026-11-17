@@ -218,3 +218,4 @@ func TestArchiveRunJobs_ArchivesOnlyCompletedJobsWithoutLogs(t *testing.T) {
 		t.Errorf("expected 2 log fetches, got %d", logsRequests.Load())
 	}
 }
+
