@@ -62,6 +62,80 @@ export class SnorlxApiClient {
     }
     return payload;
   }
+
+  // ===== Log content =====
+
+  /**
+   * Downloads a log URL. Snorlx serves archived logs under a local path that needs the API
+   * token; GitHub serves signed absolute URLs that must not carry it.
+   */
+  async fetchLogFromUrl(url: string): Promise<{ text: string; source: 'snorlx' | 'github' }> {
+    const isLocal = url.startsWith('/');
+    const headers: Record<string, string> = {};
+    if (isLocal) {
+      headers.Authorization = `Bearer ${this.token}`;
+    }
+    const target = isLocal ? new URL(url, this.baseUrl.replace(/\/$/, '') + '/') : new URL(url);
+    const res = await fetch(target, { headers });
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`Log download from ${isLocal ? url : 'GitHub signed URL'} failed (${res.status}): ${text || res.statusText}`);
+    }
+    return { text, source: isLocal ? 'snorlx' : 'github' };
+  }
+
+  /**
+   * Resolves the log URL of one job and downloads its content — archived from Snorlx, live
+   * from GitHub when not archived yet.
+   */
+  async getJobLogText(
+    jobId: number,
+    maxChars = DEFAULT_LOG_CHARS,
+  ): Promise<{ job_id: number; log: string; truncated: boolean; source: string }> {
+    const data = await this.request<{ url?: string; message?: string }>('GET', `/api/jobs/${jobId}/logs`);
+    if (!data || typeof data !== 'object' || !data.url) {
+      const reason = data && typeof data.message === 'string' ? data.message : 'no log URL returned';
+      throw new Error(`Job ${jobId} log unavailable: ${reason}`);
+    }
+    const { text, source } = await this.fetchLogFromUrl(data.url);
+    return {
+      job_id: jobId,
+      log: truncateText(text, maxChars),
+      truncated: text.length > maxChars,
+      source,
+    };
+  }
+
+  /**
+   * Aggregates the logs of a run's completed jobs into one text block, newest-style headers
+   * per job. Queued or in-progress jobs have no log and are skipped.
+   */
+  async getRunLogText(
+    runId: number,
+    maxChars = DEFAULT_LOG_CHARS,
+  ): Promise<{ run_id: number; log: string; truncated: boolean }> {
+    const data = await this.request<unknown>('GET', `/api/runs/${runId}/jobs`);
+    const jobs = Array.isArray(data)
+      ? (data as Array<{ id: number; name?: string; status?: string }>)
+      : ((data as { jobs?: Array<{ id: number; name?: string; status?: string }> } | undefined)?.jobs ?? []);
+
+    const parts: string[] = [];
+    let truncated = false;
+    for (const job of jobs) {
+      if (job.status !== 'completed') {
+        continue;
+      }
+      const jobLog = await this.getJobLogText(job.id, maxChars);
+      truncated = truncated || jobLog.truncated;
+      parts.push(`### ${job.name ?? 'job'} (job ${job.id})\n${jobLog.log}`);
+    }
+    const joined = parts.length > 0 ? parts.join('\n\n') : '(no completed jobs with logs for this run)';
+    return {
+      run_id: runId,
+      log: truncateText(joined, maxChars),
+      truncated: truncated || joined.length > maxChars,
+    };
+  }
 }
 
 function truncateText(text: string, maxChars: number): string {

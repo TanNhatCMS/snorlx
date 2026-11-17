@@ -241,15 +241,14 @@ export function createSnorlxMcpServer(client: SnorlxApiClient): McpServer {
 
   server.tool(
     'get_run_logs',
-    'Fetch run logs (truncated for MCP context). Prefer annotations first.',
+    'Fetch the run log CONTENT: the logs of its completed jobs joined into one text block (archived in Snorlx even after GitHub deleted them; falls back to live GitHub logs). Prefer annotations first; truncated for MCP context.',
     {
       id: z.number().int(),
       max_chars: z.number().int().min(1000).max(100_000).optional(),
     },
     async ({ id, max_chars }) => {
       try {
-        const data = await client.request('GET', `/api/runs/${id}/logs`);
-        return textResult(client.truncateLogs(data, max_chars));
+        return textResult(await client.getRunLogText(id, max_chars));
       } catch (err) {
         return errorResult(err);
       }
@@ -258,15 +257,27 @@ export function createSnorlxMcpServer(client: SnorlxApiClient): McpServer {
 
   server.tool(
     'get_job_logs',
-    'Fetch job logs (truncated for MCP context).',
+    'Fetch one job log CONTENT (archived in Snorlx even after GitHub deleted them; falls back to the live GitHub log). Truncated for MCP context.',
     {
       id: z.number().int(),
       max_chars: z.number().int().min(1000).max(100_000).optional(),
     },
     async ({ id, max_chars }) => {
       try {
-        const data = await client.request('GET', `/api/jobs/${id}/logs`);
-        return textResult(client.truncateLogs(data, max_chars));
+        return textResult(await client.getJobLogText(id, max_chars));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.tool(
+    'backfill_repository_logs',
+    'CONFIRM WITH THE USER before calling. Archive the job logs of a repository\u2019s recent completed runs into Snorlx so they survive GitHub\u2019s 90-day log retention. Rate-limit heavy; call again for the next slice.',
+    { id: z.number().int().describe('Repository id') },
+    async ({ id }) => {
+      try {
+        return textResult(await client.request('POST', `/api/repositories/${id}/backfill-logs`));
       } catch (err) {
         return errorResult(err);
       }
