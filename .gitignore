@@ -44,3 +44,6 @@ gosec-results.sarif
 # Temporary files
 tmp/
 temp/
+
+# plan workspace (local scratch)
+.superpowers/
