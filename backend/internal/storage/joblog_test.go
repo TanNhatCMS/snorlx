@@ -207,3 +207,42 @@ func bytesEqual(a, b []byte) bool {
 
 // strPtr is a helper for nullable string fields used by the seed helpers above.
 func strPtr(s string) *string { return &s }
+
+// UpsertRun must store a copy, not the caller's struct: memory storage is the only mode that
+// mutates runs in place, and callers (the log archiver) snapshot runs outside the storage
+// lock, so a shared pointer is a data race under concurrent webhook deliveries.
+func TestUpsertRun_ReturnsCopyNotSharedPointer(t *testing.T) {
+	s := newTestStorage()
+	input := &models.WorkflowRun{GitHubID: 77, WorkflowID: 1, RepoID: 1, Status: "in_progress"}
+	saved, err := s.UpsertRun(context.Background(), input)
+	if err != nil {
+		t.Fatalf("UpsertRun: %v", err)
+	}
+
+	// Mutating the caller's struct must not change the stored run.
+	input.Status = "queued"
+
+	got, err := s.GetRunByGitHubID(context.Background(), 77)
+	if err != nil || got == nil {
+		t.Fatalf("GetRunByGitHubID: (%v, %v)", got, err)
+	}
+	if got.Status != "in_progress" {
+		t.Fatalf("stored run leaked caller mutations: status = %q, want in_progress", got.Status)
+	}
+
+	// A second upsert must replace the stored object, not mutate it, so pointers handed out
+	// earlier stay stable.
+	saved2, err := s.UpsertRun(context.Background(), &models.WorkflowRun{GitHubID: 77, WorkflowID: 1, RepoID: 1, Status: "completed"})
+	if err != nil {
+		t.Fatalf("second UpsertRun: %v", err)
+	}
+	if saved2.Status != "completed" {
+		t.Fatalf("second upsert status = %q, want completed", saved2.Status)
+	}
+	if got.Status != "in_progress" {
+		t.Fatalf("earlier snapshot mutated by second upsert: %q", got.Status)
+	}
+	if saved2 == saved {
+		t.Fatal("UpsertRun must return a new object for an existing run (copy-on-write)")
+	}
+}

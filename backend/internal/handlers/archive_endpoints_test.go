@@ -174,3 +174,125 @@ func TestBackfillRepositoryLogs_ArchivesMissingLogs(t *testing.T) {
 		t.Errorf("completed jobs must be archived, queued job must not: %v", archived)
 	}
 }
+
+// One backfill call must not spend the calling user's whole hourly GitHub core quota: total
+// log-fetch attempts are capped, and a rate-limit response stops the pass at once.
+func TestBackfillRepositoryLogs_CapsLogFetches(t *testing.T) {
+	var logsRequests atomic.Int64
+	server := newArchiveTestServer(t, "log", &logsRequests)
+	defer server.Close()
+
+	ghClient, err := github.NewClient(&config.Config{GitHubClientID: "id", GitHubClientSecret: "secret", GitHubBaseURL: server.URL})
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+	oldCap := backfillMaxLogFetches
+	backfillMaxLogFetches = 2
+	defer func() { backfillMaxLogFetches = oldCap }()
+
+	archived := make(map[int]bool)
+	store := &mockStorage{
+		getRepositoryFunc: func(ctx context.Context, id int) (*models.Repository, error) {
+			return &models.Repository{ID: id, FullName: "acme/widgets"}, nil
+		},
+		hasRepoAccessFunc: func(ctx context.Context, userID, repoID int) (bool, error) { return true, nil },
+		listRunsFunc: func(ctx context.Context, userID int, filters *models.RunFilters, page, pageSize int) ([]models.WorkflowRun, int, error) {
+			return []models.WorkflowRun{{ID: 5, GitHubID: 555, RepoID: 7, Status: "completed"}}, 1, nil
+		},
+		listJobsForRunFunc: func(ctx context.Context, runID int) ([]models.WorkflowJob, error) {
+			return []models.WorkflowJob{
+				{ID: 1, GitHubID: 101, RunID: runID, Status: "completed"},
+				{ID: 2, GitHubID: 102, RunID: runID, Status: "completed"},
+				{ID: 3, GitHubID: 103, RunID: runID, Status: "completed"},
+			}, nil
+		},
+		hasJobLogFunc:  func(ctx context.Context, jobID int) (bool, error) { return archived[jobID], nil },
+		saveJobLogFunc: func(ctx context.Context, entry *models.JobLog) error { archived[entry.JobID] = true; return nil },
+	}
+	h := newTestHandler(store)
+	h.ghClient = ghClient
+	h.config.LogArchiveMaxSizeBytes = 1 << 20
+
+	req := withURLParam(withUser(httptest.NewRequest(http.MethodPost, "/api/repositories/7/backfill-logs", nil), &models.User{ID: 2, AccessToken: "t"}), "id", "7")
+	rec := httptest.NewRecorder()
+	h.BackfillRepositoryLogs(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if got := logsRequests.Load(); got != 2 {
+		t.Fatalf("log fetches = %d, want 2 (cap)", got)
+	}
+	if !archived[1] || !archived[2] || archived[3] {
+		t.Fatalf("cap must stop after the second job: %v", archived)
+	}
+}
+
+func TestBackfillRepositoryLogs_StopsOnRateLimit(t *testing.T) {
+	var logsRequests atomic.Int64
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		p := strings.TrimPrefix(r.URL.Path, "/api/v3")
+		if strings.HasPrefix(p, "/repos/acme/widgets/actions/jobs/") && strings.HasSuffix(p, "/logs") {
+			if logsRequests.Add(1) >= 2 {
+				// Second attempt: GitHub says the core quota is exhausted.
+				w.Header().Set("X-RateLimit-Limit", "5000")
+				w.Header().Set("X-RateLimit-Remaining", "0")
+				w.Header().Set("X-RateLimit-Reset", "1893456000")
+				w.WriteHeader(http.StatusForbidden)
+				_, _ = w.Write([]byte(`{"message":"API rate limit exceeded"}`))
+				return
+			}
+			jobID := strings.TrimSuffix(strings.TrimPrefix(p, "/repos/acme/widgets/actions/jobs/"), "/logs")
+			http.Redirect(w, r, "http://"+r.Host+"/signed/"+jobID, http.StatusFound)
+			return
+		}
+		if strings.HasPrefix(p, "/signed/") {
+			_, _ = w.Write([]byte("rate limit log"))
+			return
+		}
+		http.NotFound(w, r)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	ghClient, err := github.NewClient(&config.Config{GitHubClientID: "id", GitHubClientSecret: "secret", GitHubBaseURL: server.URL})
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+
+	archived := make(map[int]bool)
+	store := &mockStorage{
+		getRepositoryFunc: func(ctx context.Context, id int) (*models.Repository, error) {
+			return &models.Repository{ID: id, FullName: "acme/widgets"}, nil
+		},
+		hasRepoAccessFunc: func(ctx context.Context, userID, repoID int) (bool, error) { return true, nil },
+		listRunsFunc: func(ctx context.Context, userID int, filters *models.RunFilters, page, pageSize int) ([]models.WorkflowRun, int, error) {
+			return []models.WorkflowRun{{ID: 5, GitHubID: 555, RepoID: 7, Status: "completed"}}, 1, nil
+		},
+		listJobsForRunFunc: func(ctx context.Context, runID int) ([]models.WorkflowJob, error) {
+			return []models.WorkflowJob{
+				{ID: 1, GitHubID: 101, RunID: runID, Status: "completed"},
+				{ID: 2, GitHubID: 102, RunID: runID, Status: "completed"},
+				{ID: 3, GitHubID: 103, RunID: runID, Status: "completed"},
+			}, nil
+		},
+		hasJobLogFunc:  func(ctx context.Context, jobID int) (bool, error) { return archived[jobID], nil },
+		saveJobLogFunc: func(ctx context.Context, entry *models.JobLog) error { archived[entry.JobID] = true; return nil },
+	}
+	h := newTestHandler(store)
+	h.ghClient = ghClient
+	h.config.LogArchiveMaxSizeBytes = 1 << 20
+
+	req := withURLParam(withUser(httptest.NewRequest(http.MethodPost, "/api/repositories/7/backfill-logs", nil), &models.User{ID: 2, AccessToken: "t"}), "id", "7")
+	rec := httptest.NewRecorder()
+	h.BackfillRepositoryLogs(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if got := logsRequests.Load(); got != 2 {
+		t.Fatalf("a rate-limit response must stop the pass after the next attempt, got %d fetches", got)
+	}
+	if archived[3] {
+		t.Fatal("job after rate-limit response must not be attempted")
+	}
+}
