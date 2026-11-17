@@ -66,16 +66,18 @@ export class SnorlxApiClient {
   // ===== Log content =====
 
   /**
-   * Downloads a log URL. Snorlx serves archived logs under a local path that needs the API
-   * token; GitHub serves signed absolute URLs that must not carry it.
+   * Downloads a log URL. Snorlx serves archived logs under a same-origin path that needs the
+   * API token; GitHub serves signed absolute URLs that must not carry it. Gating is on the
+   * resolved origin, so a protocol-relative URL can never leak the token cross-origin.
    */
   async fetchLogFromUrl(url: string): Promise<{ text: string; source: 'snorlx' | 'github' }> {
-    const isLocal = url.startsWith('/');
+    const base = this.baseUrl.replace(/\/$/, '') + '/';
+    const target = new URL(url, base);
+    const isLocal = target.origin === new URL(base).origin;
     const headers: Record<string, string> = {};
     if (isLocal) {
       headers.Authorization = `Bearer ${this.token}`;
     }
-    const target = isLocal ? new URL(url, this.baseUrl.replace(/\/$/, '') + '/') : new URL(url);
     const res = await fetch(target, { headers });
     const text = await res.text();
     if (!res.ok) {
@@ -119,13 +121,16 @@ export class SnorlxApiClient {
       ? (data as Array<{ id: number; name?: string; status?: string }>)
       : ((data as { jobs?: Array<{ id: number; name?: string; status?: string }> } | undefined)?.jobs ?? []);
 
+    const completed = jobs.filter((job) => job.status === 'completed');
+    // Budget per job so every completed job keeps its header and its freshest output: CI
+    // debugging usually needs the first failing job, and a plain tail-truncate of the joined
+    // text would drop earlier jobs entirely. 64 chars per job reserve its header line.
+    const budget = Math.max(200, Math.floor((maxChars - 64 * completed.length) / Math.max(1, completed.length)));
+
     const parts: string[] = [];
     let truncated = false;
-    for (const job of jobs) {
-      if (job.status !== 'completed') {
-        continue;
-      }
-      const jobLog = await this.getJobLogText(job.id, maxChars);
+    for (const job of completed) {
+      const jobLog = await this.getJobLogText(job.id, budget);
       truncated = truncated || jobLog.truncated;
       parts.push(`### ${job.name ?? 'job'} (job ${job.id})\n${jobLog.log}`);
     }

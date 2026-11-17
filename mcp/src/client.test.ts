@@ -179,3 +179,50 @@ test('getRunLogText truncates the joined log to max_chars', async () => {
 	assert.ok(out.log.length <= 50, `log length ${out.log.length} must fit the cap`);
 	await backend.close();
 });
+
+test('fetchLogFromUrl never sends the Snorlx token to a protocol-relative foreign URL', async () => {
+	const evil = await startServer((req, res) => {
+		assert.equal(req.headers.authorization, undefined, 'token must never leave the Snorlx origin');
+		res.setHeader('Content-Type', 'text/plain');
+		res.end('evil content');
+	});
+	const backend = await startServer((req, res) => {
+		json(res, { url: `${evil.url.replace('http://', '//')}/signed/1` });
+	});
+	const client = new SnorlxApiClient(backend.url, 'tok');
+
+	const out = await client.getJobLogText(1);
+
+	assert.equal(out.log, 'evil content');
+	assert.equal(out.source, 'github');
+	await Promise.all([backend.close(), evil.close()]);
+});
+
+test('getRunLogText budgets per job so every completed job keeps its header', async () => {
+	const backend = await startServer((req, res) => {
+		if (req.url === '/api/runs/7/jobs') {
+			json(res, [
+				{ id: 1, name: 'alpha', status: 'completed' },
+				{ id: 2, name: 'beta', status: 'completed' },
+				{ id: 3, name: 'gamma', status: 'completed' },
+			]);
+			return;
+		}
+		if (req.url?.endsWith('/logs')) {
+			json(res, { url: req.url.replace('/logs', '/logs/content') });
+			return;
+		}
+		res.setHeader('Content-Type', 'text/plain');
+		res.end('z'.repeat(2000));
+	});
+	const client = new SnorlxApiClient(backend.url, 'tok');
+
+	const out = await client.getRunLogText(7, 1500);
+
+	assert.ok(out.log.includes('alpha'), 'first job header must survive');
+	assert.ok(out.log.includes('beta'), 'middle job header must survive');
+	assert.ok(out.log.includes('gamma'), 'last job header must survive');
+	assert.ok(out.log.length <= 1500, `log length ${out.log.length} must fit the cap`);
+	assert.ok(out.log.endsWith('zzz'.slice(0, 3)) || out.log.includes('zzz'), 'tails must be kept');
+	await backend.close();
+});

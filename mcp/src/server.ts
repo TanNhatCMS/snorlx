@@ -241,7 +241,7 @@ export function createSnorlxMcpServer(client: SnorlxApiClient): McpServer {
 
   server.tool(
     'get_run_logs',
-    'Fetch the run log CONTENT: the logs of its completed jobs joined into one text block (archived in Snorlx even after GitHub deleted them; falls back to live GitHub logs). Prefer annotations first; truncated for MCP context.',
+    'Fetch the run log CONTENT: the logs of its completed jobs joined into one text block (archived in Snorlx even after GitHub deleted them; falls back to live GitHub logs). Prefer annotations first. Each job keeps its header and its last output lines; the whole result stays within max_chars.',
     {
       id: z.number().int(),
       max_chars: z.number().int().min(1000).max(100_000).optional(),
@@ -257,7 +257,7 @@ export function createSnorlxMcpServer(client: SnorlxApiClient): McpServer {
 
   server.tool(
     'get_job_logs',
-    'Fetch one job log CONTENT (archived in Snorlx even after GitHub deleted them; falls back to the live GitHub log). Truncated for MCP context.',
+    'Fetch one job log CONTENT (archived in Snorlx even after GitHub deleted them; falls back to the live GitHub log). Tail-truncated: when truncated=true the result keeps the last max_chars characters.',
     {
       id: z.number().int(),
       max_chars: z.number().int().min(1000).max(100_000).optional(),
