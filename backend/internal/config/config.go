@@ -77,6 +77,14 @@ type Config struct {
 	// RunPollInterval is the cadence of the live poller that refreshes active workflow runs for
 	// watching users. Zero disables the background poller; webhooks and manual refresh still work.
 	RunPollInterval time.Duration
+
+	// LogArchiveEnabled turns the job log archiver on: completed jobs have their logs downloaded
+	// once and stored in the storage backend, outliving GitHub's own 90-day retention.
+	LogArchiveEnabled bool
+
+	// LogArchiveMaxSizeBytes caps how large a single uncompressed job log may be. Larger logs
+	// are skipped so one runaway job cannot blow up storage.
+	LogArchiveMaxSizeBytes int
 }
 
 // Load reads configuration from environment variables
@@ -126,6 +134,17 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 
+	logArchiveEnabled := true
+	switch strings.ToLower(os.Getenv("LOG_ARCHIVE_ENABLED")) {
+	case "0", "false", "no":
+		logArchiveEnabled = false
+	}
+
+	logArchiveMaxSizeBytes, err := parseLogArchiveMaxSize(os.Getenv("LOG_ARCHIVE_MAX_SIZE_BYTES"))
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		Port:                getEnv("PORT", "8080"),
 		LogLevel:            getEnv("LOG_LEVEL", "info"),
@@ -144,7 +163,9 @@ func Load() (*Config, error) {
 		SessionSecret:       getEnv("SESSION_SECRET", defaultSessionSecret),
 		SyncLimit:           syncLimit,
 		SyncRepos:           splitList(os.Getenv("SYNC_REPOS")),
-		RunPollInterval:     runPollInterval,
+		RunPollInterval:       runPollInterval,
+		LogArchiveEnabled:     logArchiveEnabled,
+		LogArchiveMaxSizeBytes: logArchiveMaxSizeBytes,
 	}
 
 	if !isDevMode {
@@ -230,6 +251,24 @@ func isLoopbackHost(host string) bool {
 	}
 	ip := net.ParseIP(host)
 	return ip != nil && ip.IsLoopback()
+}
+
+// defaultLogArchiveMaxSizeBytes caps one uncompressed job log at 50 MB.
+const defaultLogArchiveMaxSizeBytes = 50 << 20
+
+// parseLogArchiveMaxSize accepts a byte count. Empty means the default; non-positive is rejected.
+func parseLogArchiveMaxSize(raw string) (int, error) {
+	if raw == "" {
+		return defaultLogArchiveMaxSizeBytes, nil
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("LOG_ARCHIVE_MAX_SIZE_BYTES must be an integer, got %q", raw)
+	}
+	if n <= 0 {
+		return 0, fmt.Errorf("LOG_ARCHIVE_MAX_SIZE_BYTES must be positive, got %q", raw)
+	}
+	return n, nil
 }
 
 // parseRunPollInterval accepts a Go duration such as 10s or 1m. Empty means the default, "0"

@@ -407,6 +407,11 @@ func (h *Handler) refreshActiveRun(ctx context.Context, clients *passClients, ru
 		h.etags.set(runKey, etag)
 		if before != stateOf(saved) {
 			h.wsHub.SendWorkflowRunUpdate(h.repoViewers(ctx, run.RepoID), saved)
+			// The run just turned completed: archive its job logs before GitHub's retention
+			// window can take them away.
+			if before.status != "completed" && stateOf(saved).status == "completed" {
+				h.archiveRunJobsAsync(fullName, *saved)
+			}
 		}
 	}
 
@@ -546,6 +551,11 @@ func (h *Handler) discoverRepoRuns(ctx context.Context, clients *passClients, re
 		}
 		if latestChange == nil && (!known || before != stateOf(saved)) {
 			latestChange = saved
+		}
+		// Discovered runs can be already completed at first sight (new repo, long poll gap);
+		// archive their logs too, but only once per run to avoid retrying dead logs forever.
+		if stateOf(saved).status == "completed" && (!known || before.status != "completed") {
+			h.archiveRunJobsAsync(repo.FullName, *saved)
 		}
 	}
 	if allStored {

@@ -682,6 +682,12 @@ func (h *Handler) processWebhookEvent(eventType string, event interface{}) {
 
 		h.wsHub.SendWorkflowRunUpdate(h.repoViewers(ctx, repo.ID), saved)
 
+		// A completed run's logs can disappear from GitHub after the retention window; archive
+		// them now so the dashboard keeps them forever.
+		if e.GetAction() == "completed" {
+			h.archiveRunJobsAsync(repo.FullName, *saved)
+		}
+
 	case *gh.WorkflowJobEvent:
 		log.Info().
 			Str("action", e.GetAction()).
@@ -709,6 +715,12 @@ func (h *Handler) processWebhookEvent(eventType string, event interface{}) {
 			return
 		}
 		h.wsHub.SendWorkflowJobUpdate(h.repoViewers(ctx, repo.ID), runJobsEvent{RunID: run.ID, RunGitHubID: run.GitHubID})
+
+		// A completed job event also sweeps the run's other completed jobs, catching jobs whose
+		// logs were not archived when the run-completed hook ran.
+		if e.GetAction() == "completed" {
+			h.archiveRunJobsAsync(repo.FullName, *run)
+		}
 
 	case *gh.DeploymentEvent:
 		log.Info().
