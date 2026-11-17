@@ -85,6 +85,12 @@ type Storage interface {
 	// Backfill
 	BackfillDeploymentRuns(ctx context.Context, userID int) (int, error)
 
+	// Job log archive
+	SaveJobLog(ctx context.Context, entry *models.JobLog) error
+	HasJobLog(ctx context.Context, jobID int) (bool, error)
+	GetJobLog(ctx context.Context, jobID int) (*models.JobLog, error)
+	ListJobsMissingLogs(ctx context.Context, repoID int, limit int) ([]models.WorkflowJob, error)
+
 	// Repository Scores
 	UpsertRepositoryScore(ctx context.Context, score *models.RepositoryScore) (*models.RepositoryScore, error)
 	GetLatestRepositoryScore(ctx context.Context, repoID int) (*models.RepositoryScore, error)

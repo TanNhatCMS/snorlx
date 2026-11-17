@@ -45,6 +45,9 @@ type MemoryStorage struct {
 	// userRepos records which repositories each user may see: userID -> set of repo IDs.
 	userRepos map[int]map[int]bool
 
+	// jobLogs is the archived job log store (job archive feature). Created lazily.
+	jobLogs map[int]*models.JobLog
+
 	// GitHub ID indexes for fast lookups
 	orgGitHubIndex      map[int64]int
 	repoGitHubIndex     map[int64]int
