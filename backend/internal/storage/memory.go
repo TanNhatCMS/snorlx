@@ -45,6 +45,9 @@ type MemoryStorage struct {
 	// userRepos records which repositories each user may see: userID -> set of repo IDs.
 	userRepos map[int]map[int]bool
 
+	// jobLogs is the archived job log store (job archive feature). Created lazily.
+	jobLogs map[int]*models.JobLog
+
 	// GitHub ID indexes for fast lookups
 	orgGitHubIndex      map[int64]int
 	repoGitHubIndex     map[int64]int
@@ -650,8 +653,10 @@ func (m *MemoryStorage) UpsertRun(ctx context.Context, run *models.WorkflowRun) 
 	defer m.mu.Unlock()
 
 	if existingID, ok := m.runGitHubIndex[run.GitHubID]; ok {
-		// Update existing
-		existing := m.runs[existingID]
+		// Update existing via copy-on-write: stored runs are handed out as shared pointers, so
+		// mutating one in place would race with readers that copied it outside the lock (the
+		// log archiver snapshots runs this way).
+		existing := *m.runs[existingID]
 		existing.Status = run.Status
 		existing.Conclusion = run.Conclusion
 		existing.CompletedAt = run.CompletedAt
@@ -660,17 +665,19 @@ func (m *MemoryStorage) UpsertRun(ctx context.Context, run *models.WorkflowRun) 
 		if run.CommitTimestamp != nil {
 			existing.CommitTimestamp = run.CommitTimestamp
 		}
-		return existing, nil
+		m.runs[existingID] = &existing
+		return &existing, nil
 	}
 
 	// Create new
 	run.ID = int(atomic.AddInt32(&m.runIDCounter, 1))
 	run.CreatedAt = time.Now()
 
-	m.runs[run.ID] = run
-	m.runGitHubIndex[run.GitHubID] = run.ID
+	stored := *run
+	m.runs[stored.ID] = &stored
+	m.runGitHubIndex[run.GitHubID] = stored.ID
 
-	return run, nil
+	return &stored, nil
 }
 
 // ===== Workflow Jobs =====

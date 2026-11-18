@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"regexp"
@@ -682,6 +683,12 @@ func (h *Handler) processWebhookEvent(eventType string, event interface{}) {
 
 		h.wsHub.SendWorkflowRunUpdate(h.repoViewers(ctx, repo.ID), saved)
 
+		// A completed run's logs can disappear from GitHub after the retention window; archive
+		// them now so the dashboard keeps them forever.
+		if e.GetAction() == "completed" {
+			h.archiveRunJobsAsync(repo.FullName, *saved)
+		}
+
 	case *gh.WorkflowJobEvent:
 		log.Info().
 			Str("action", e.GetAction()).
@@ -709,6 +716,12 @@ func (h *Handler) processWebhookEvent(eventType string, event interface{}) {
 			return
 		}
 		h.wsHub.SendWorkflowJobUpdate(h.repoViewers(ctx, repo.ID), runJobsEvent{RunID: run.ID, RunGitHubID: run.GitHubID})
+
+		// A completed job event also sweeps the run's other completed jobs, catching jobs whose
+		// logs were not archived when the run-completed hook ran.
+		if e.GetAction() == "completed" {
+			h.archiveRunJobsAsync(repo.FullName, *run)
+		}
 
 	case *gh.DeploymentEvent:
 		log.Info().
@@ -1557,6 +1570,15 @@ func (h *Handler) GetJobLogs(w http.ResponseWriter, r *http.Request) {
 	// Get the run to find the repo and verify access
 	run, ok := h.loadAccessibleRun(w, r, user, job.RunID)
 	if !ok {
+		return
+	}
+
+	// An archived log wins: it survives GitHub's 90-day log retention, and the shape of the
+	// response stays {url} so the frontend needs no change.
+	if archived, err := h.storage.HasJobLog(r.Context(), job.ID); err == nil && archived {
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"url": fmt.Sprintf("/api/jobs/%d/logs/content", job.ID),
+		})
 		return
 	}
 

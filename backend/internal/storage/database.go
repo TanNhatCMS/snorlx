@@ -1674,6 +1674,18 @@ CREATE TABLE IF NOT EXISTS deployments (
 CREATE INDEX IF NOT EXISTS idx_deployments_repo_id ON deployments(repo_id);
 CREATE INDEX IF NOT EXISTS idx_deployments_environment ON deployments(environment);
 
+-- Job log archive: one gzip-compressed copy of each completed job's log, kept forever
+-- (longer than GitHub's own 90-day retention).
+CREATE TABLE IF NOT EXISTS job_logs (
+    job_id INTEGER PRIMARY KEY,
+    run_id INTEGER NOT NULL,
+    content BYTEA NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_logs_run_id ON job_logs(run_id);
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,

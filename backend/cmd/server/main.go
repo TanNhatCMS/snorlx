@@ -175,6 +175,7 @@ func main() {
 			r.Post("/repositories/sync", h.SyncRepositories)
 			r.Post("/repositories/{id}/sync", h.SyncRepository)
 			r.Post("/repositories/backfill-deployment-runs", h.BackfillDeploymentRuns)
+			r.Post("/repositories/{id}/backfill-logs", h.BackfillRepositoryLogs)
 
 			// Workflows
 			r.Get("/workflows", h.ListWorkflows)
@@ -194,6 +195,7 @@ func main() {
 
 			// Jobs
 			r.Get("/jobs/{id}/logs", h.GetJobLogs)
+			r.Get("/jobs/{id}/logs/content", h.GetJobLogContent)
 
 			// Dashboard
 			r.Get("/dashboard/summary", h.GetDashboardSummary)

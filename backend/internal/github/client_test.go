@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"snorlx/backend/internal/config"
@@ -541,5 +542,38 @@ func TestRetryWithBackoff_ContextCanceled(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected error for cancelled context")
+	}
+}
+
+// The log endpoints follow redirects inside go-github and surface plain "unexpected status
+// code" errors; the wrapper must wrap them so callers can react to the HTTP status (a
+// backfill pass must stop on 403/429 rate limits).
+func TestGetWorkflowJobLogs_WrapsStatusCodeError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-RateLimit-Limit", "5000")
+		w.Header().Set("X-RateLimit-Remaining", "0")
+		w.Header().Set("X-RateLimit-Reset", "1893456000")
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte(`{"message":"API rate limit exceeded"}`))
+	}))
+	defer server.Close()
+
+	cfg := &config.Config{GitHubClientID: "id", GitHubClientSecret: "secret", GitHubBaseURL: server.URL}
+	client, err := NewClient(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ghClient := client.GetUserClient(context.Background(), &oauth2.Token{AccessToken: "tok"})
+
+	_, err = client.GetWorkflowJobLogs(context.Background(), ghClient, "acme", "widgets", 77)
+	var scErr *StatusCodeError
+	if !errors.As(err, &scErr) {
+		t.Fatalf("expected *StatusCodeError, got %T: %v", err, err)
+	}
+	if scErr.StatusCode != http.StatusForbidden {
+		t.Fatalf("StatusCode = %d, want 403", scErr.StatusCode)
+	}
+	if scErr.Err == nil {
+		t.Fatal("StatusCodeError must wrap the underlying error")
 	}
 }

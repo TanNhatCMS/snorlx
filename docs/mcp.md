@@ -64,12 +64,16 @@ Without `MCP_HTTP_TOKEN`, anyone who can reach `/mcp` could drive all tools usin
 
 ## Tools
 
-Read tools cover dashboard summary/trends, orgs, repos, scores, workflows, runs, jobs, annotations, truncated logs, and active pipelines.
+Read tools cover dashboard summary/trends, orgs, repos, scores, workflows, runs, jobs, annotations, active pipelines, and **log content**:
+
+- `get_job_logs` returns one job's log **content** — served from Snorlx's archive even after GitHub's 90-day retention deleted it, with the live GitHub log as fallback.
+- `get_run_logs` returns a run's log as one text block: the logs of its completed jobs joined with `### <name> (job <id>)` headers. Prefer `get_run_annotations` for quick failure hints; both truncate to `max_chars` (default 24k) for MCP context limits.
 
 Write tools (require token `write` scope; confirm with the user before use):
 
 - `sync_repositories` / `sync_repository`
 - `backfill_deployment_runs`
+- `backfill_repository_logs` — archive recent completed runs' job logs into Snorlx so they survive GitHub's retention window (rate-limit heavy; call again for the next slice)
 - `update_workflow`
 - `rerun_workflow` / `cancel_run`
 

@@ -502,20 +502,42 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, client *github.Client, ow
 	return allJobs, nil
 }
 
+// StatusCodeError carries an HTTP status from a GitHub API call that does not surface
+// go-github's *ErrorResponse: the log-download endpoints follow redirects and answer plain
+// "unexpected status code" errors, so the status would otherwise be lost to string parsing.
+type StatusCodeError struct {
+	StatusCode int
+	Err        error
+}
+
+func (e *StatusCodeError) Error() string { return e.Err.Error() }
+func (e *StatusCodeError) Unwrap() error { return e.Err }
+
+// wrapStatusCode attaches the HTTP status (when the response carries one) to an error.
+func wrapStatusCode(err error, resp *github.Response) error {
+	if err == nil {
+		return nil
+	}
+	if resp != nil && resp.Response != nil {
+		return &StatusCodeError{StatusCode: resp.Response.StatusCode, Err: err}
+	}
+	return err
+}
+
 // GetWorkflowRunLogs gets the logs URL for a workflow run
 func (c *Client) GetWorkflowRunLogs(ctx context.Context, client *github.Client, owner, repo string, runID int64) (string, error) {
-	url, _, err := client.Actions.GetWorkflowRunLogs(ctx, owner, repo, runID, 2)
+	url, resp, err := client.Actions.GetWorkflowRunLogs(ctx, owner, repo, runID, 2)
 	if err != nil {
-		return "", err
+		return "", wrapStatusCode(err, resp)
 	}
 	return url.String(), nil
 }
 
 // GetWorkflowJobLogs gets the logs URL for a specific job
 func (c *Client) GetWorkflowJobLogs(ctx context.Context, client *github.Client, owner, repo string, jobID int64) (string, error) {
-	url, _, err := client.Actions.GetWorkflowJobLogs(ctx, owner, repo, jobID, 2)
+	url, resp, err := client.Actions.GetWorkflowJobLogs(ctx, owner, repo, jobID, 2)
 	if err != nil {
-		return "", err
+		return "", wrapStatusCode(err, resp)
 	}
 	return url.String(), nil
 }
