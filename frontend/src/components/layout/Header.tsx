@@ -23,11 +23,11 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { api } from "../../services/api";
 
 const mobileNavigation = [
-	{ name: "Dashboard", href: "/", icon: LayoutDashboard },
+	{ name: "Tổng quan", href: "/", icon: LayoutDashboard },
 	{ name: "Workflows", href: "/workflows", icon: Workflow },
 	{ name: "Runs", href: "/runs", icon: Play },
 	{ name: "Repositories", href: "/repositories", icon: FolderGit2 },
-	{ name: "Settings", href: "/settings", icon: Settings },
+	{ name: "Cài đặt", href: "/settings", icon: Settings },
 ];
 
 export function Header() {
@@ -75,7 +75,7 @@ export function Header() {
 							setShowMobileMenu(!showMobileMenu);
 						}}
 						className="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-500 transition-all hover:bg-gray-100 lg:hidden dark:text-slate-400 dark:hover:border dark:hover:border-purple-500/30 dark:hover:bg-slate-800/50"
-						aria-label={showMobileMenu ? "Close menu" : "Open menu"}
+						aria-label={showMobileMenu ? "Đóng menu" : "Mở menu"}
 						aria-expanded={showMobileMenu}
 						aria-controls="mobile-navigation"
 					>
@@ -96,7 +96,7 @@ export function Header() {
 							)}
 						/>
 						<span className="hidden truncate text-sm text-gray-500 sm:inline dark:text-slate-400">
-							{isConnected ? "Connected" : "Disconnected"}
+							{isConnected ? "Đã kết nối" : "Mất kết nối"}
 						</span>
 					</div>
 				</div>
@@ -106,8 +106,8 @@ export function Header() {
 						type="button"
 						onClick={() => setTheme(isDark ? "light" : "dark")}
 						className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-sm font-medium text-gray-900 transition-all hover:bg-gray-100 sm:h-auto sm:w-auto sm:px-3 sm:py-2 dark:border dark:border-secondary-500/20 dark:text-slate-100 dark:hover:border-secondary-500/50 dark:hover:bg-slate-800/50"
-						title={`Switch to ${isDark ? "light" : "dark"} mode`}
-						aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+						title={`Chuyển sang chế độ ${isDark ? "sáng" : "tối"}`}
+						aria-label={`Chuyển sang chế độ ${isDark ? "sáng" : "tối"}`}
 					>
 						{isDark ? (
 							<Sun className="w-4 h-4" />
@@ -126,13 +126,13 @@ export function Header() {
 								? "cursor-not-allowed bg-gray-200 text-gray-600 dark:border dark:border-slate-600/50 dark:bg-slate-800 dark:text-slate-500"
 								: "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:border dark:border-secondary-500/20 dark:bg-slate-800/50 dark:text-slate-100 dark:hover:border-secondary-500/50 dark:hover:bg-slate-700 dark:hover:shadow-lg dark:hover:shadow-secondary-500/10",
 						)}
-						aria-label={sync.isSyncing ? "Syncing repositories" : "Sync repositories"}
+						aria-label={sync.isSyncing ? "Đang đồng bộ repositories" : "Đồng bộ repositories"}
 					>
 						<RefreshCw
 							className={cn("w-4 h-4", sync.isSyncing && "animate-spin")}
 						/>
 						<span className="hidden sm:inline">
-							{sync.isSyncing ? "Syncing..." : "Sync"}
+							{sync.isSyncing ? "Đang đồng bộ..." : "Đồng bộ"}
 						</span>
 					</button>
 
@@ -143,7 +143,7 @@ export function Header() {
 							className="relative inline-flex h-11 max-w-[42vw] items-center gap-2 rounded-lg px-2 text-sm font-medium text-gray-900 transition-all hover:bg-gray-100 sm:h-auto sm:max-w-xs sm:px-3 sm:py-2 dark:border dark:border-secondary-500/20 dark:text-slate-100 dark:hover:border-secondary-500/50 dark:hover:bg-slate-800/50"
 							aria-expanded={showUserMenu}
 							aria-haspopup="menu"
-							aria-label={user?.name || user?.login || "Account menu"}
+							aria-label={user?.name || user?.login || "Menu tài khoản"}
 						>
 							{user?.avatar_url ? (
 								<img
@@ -179,7 +179,7 @@ export function Header() {
 										className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700/50"
 									>
 										<LogOut className="h-4 w-4" />
-										Logout
+										đăng xuất
 									</button>
 								</div>
 							</div>
@@ -202,7 +202,7 @@ export function Header() {
 								Snorlx Dashboard
 							</p>
 							<p className="text-xs text-gray-500 dark:text-slate-400">
-								{isConnected ? "Connected" : "Disconnected"}
+								{isConnected ? "Đã kết nối" : "Mất kết nối"}
 							</p>
 						</div>
 					</div>

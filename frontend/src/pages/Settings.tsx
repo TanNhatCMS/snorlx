@@ -47,9 +47,9 @@ export function Settings() {
   return (
     <div className="min-w-0 space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Settings</h1>
+        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Cài đặt</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
-          Manage your dashboard preferences
+          Quản lý tùy chọn dashboard của bạn
         </p>
       </div>
 
@@ -58,20 +58,20 @@ export function Settings() {
         <div className="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <SettingsIcon className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Appearance</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Giao diện</h2>
           </div>
         </div>
         <div className="p-4 sm:p-6">
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
-                Theme
+                Chủ đề
               </label>
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-3">
                 {[
-                  { value: 'light', label: 'Light', icon: Sun },
-                  { value: 'dark', label: 'Dark', icon: Moon },
-                  { value: 'system', label: 'System', icon: Monitor },
+                  { value: 'light', label: 'Sáng', icon: Sun },
+                  { value: 'dark', label: 'Tối', icon: Moon },
+                  { value: 'system', label: 'Hệ thống', icon: Monitor },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -103,13 +103,13 @@ export function Settings() {
         </div>
         <div className="space-y-4 p-4 sm:p-6">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Create a personal token for MCP clients and automation. The full token is shown only once.
+            Tạo personal token cho MCP client và automation. Token đầy đủ chỉ hiển thị một lần duy nhất.
           </p>
 
           {createdToken && (
             <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 p-4 space-y-2">
               <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                Copy this token now. You will not see it again.
+                Copy token này ngay. Bạn sẽ không thấy lại nữa.
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <code className="min-w-0 flex-1 break-all rounded border border-amber-200 bg-white px-3 py-2 text-xs dark:border-amber-800 dark:bg-gray-900">
@@ -121,7 +121,7 @@ export function Settings() {
                   className="inline-flex shrink-0 items-center justify-center gap-1 rounded-lg bg-amber-600 px-3 py-2 text-sm text-white hover:bg-amber-700"
                 >
                   <Copy className="w-4 h-4" />
-                  {copyDone ? 'Copied' : 'Copy'}
+                  {copyDone ? 'Đã copy' : 'Copy'}
                 </button>
               </div>
               <button
@@ -129,7 +129,7 @@ export function Settings() {
                 className="text-xs text-amber-800 dark:text-amber-300 underline"
                 onClick={() => setCreatedToken(null)}
               >
-                Dismiss
+                Đóng
               </button>
             </div>
           )}
@@ -137,13 +137,13 @@ export function Settings() {
           <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                Token name
+                Tên token
               </label>
               <input
                 type="text"
                 value={tokenName}
                 onChange={(e) => setTokenName(e.target.value)}
-                placeholder="e.g. Cursor MCP"
+                placeholder="vd. Cursor MCP"
                 className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm"
               />
             </div>
@@ -153,7 +153,7 @@ export function Settings() {
                 checked={readOnly}
                 onChange={(e) => setReadOnly(e.target.checked)}
               />
-              Read-only
+              Chỉ đọc
             </label>
             <button
               type="button"
@@ -161,7 +161,7 @@ export function Settings() {
               onClick={() => createMutation.mutate()}
               className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
             >
-              {createMutation.isPending ? 'Creating…' : 'Create token'}
+              {createMutation.isPending ? 'Đang tạo…' : 'Tạo token'}
             </button>
           </div>
 
@@ -171,31 +171,31 @@ export function Settings() {
 
           <div className="divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg">
             {tokensLoading && (
-              <p className="p-4 text-sm text-gray-500">Loading tokens…</p>
+              <p className="p-4 text-sm text-gray-500">Đang tải token…</p>
             )}
             {!tokensLoading && (tokensData?.data?.length ?? 0) === 0 && (
-              <p className="p-4 text-sm text-gray-500">No API tokens yet.</p>
+              <p className="p-4 text-sm text-gray-500">Chưa có API token nào.</p>
             )}
             {tokensData?.data?.map((token) => (
               <div key={token.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="break-words font-medium text-gray-900 dark:text-gray-100">{token.name}</p>
                   <p className="mt-1 break-words text-xs text-gray-500 dark:text-gray-400">
-                    {token.token_prefix}… · scopes: {token.scopes.join(', ')} · created{' '}
+                    {token.token_prefix}… · scopes: {token.scopes.join(', ')} · tạo lúc {' '}
                     {new Date(token.created_at).toLocaleString()}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm(`Revoke token "${token.name}"?`)) {
+                    if (confirm(`Thu hồi token "${token.name}"?`)) {
                       revokeMutation.mutate(token.id);
                     }
                   }}
                   className="inline-flex w-fit shrink-0 items-center gap-1 self-start rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Revoke
+                  Thu hồi
                 </button>
               </div>
             ))}
@@ -215,18 +215,18 @@ export function Settings() {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 rounded-lg bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:bg-gray-800">
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Connected</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Đã kết nối</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Your GitHub App is connected and receiving webhooks
+                  GitHub App của bạn đã kết nối và đang nhận webhook
                 </p>
               </div>
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                <span className="text-sm text-green-600 dark:text-green-400">Active</span>
+                <span className="text-sm text-green-600 dark:text-green-400">Hoạt động</span>
               </span>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Permissions</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Quyền hạn</p>
               <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-300">
                 <li>• actions: read</li>
                 <li>• checks: read</li>
@@ -243,22 +243,22 @@ export function Settings() {
         <div className="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Data Management</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Quản lý dữ liệu</h2>
           </div>
         </div>
         <div className="p-4 sm:p-6">
           <div className="space-y-4">
             <div className="flex flex-col gap-2 rounded-lg bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between dark:bg-gray-800">
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">Data Retention</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">Lưu giữ dữ liệu</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Workflow run data is retained for 1 year
+                  Dữ liệu workflow run được lưu giữ trong 1 năm
                 </p>
               </div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">365 days</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">365 ngày</span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Data older than the retention period is automatically cleaned up by TimescaleDB retention policies.
+              Dữ liệu cũ hơn thời hạn lưu giữ được TimescaleDB retention policy tự động dọn dẹp.
             </p>
           </div>
         </div>

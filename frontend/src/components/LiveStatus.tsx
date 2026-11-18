@@ -19,8 +19,8 @@ export function LiveStatus({ className }: { className?: string }) {
 			)}
 			title={
 				isConnected
-					? "Updates arrive automatically as soon as GitHub reports a change"
-					: "Live connection lost: this view polls the server until it reconnects"
+					? "Cập nhật tự động đến ngay khi GitHub báo thay đổi"
+					: "Mất kết nối trực tiếp: trang này sẽ poll server đến khi kết nối lại"
 			}
 			role="status"
 		>
@@ -35,7 +35,7 @@ export function LiveStatus({ className }: { className?: string }) {
 					)}
 				/>
 			</span>
-			{isConnected ? "Live" : "Polling"}
+			{isConnected ? "Trực tiếp" : "Đang poll"}
 		</span>
 	);
 }

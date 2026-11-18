@@ -122,17 +122,17 @@ export function Dashboard() {
 	const runData = summary
 		? [
 				{
-					name: "Success",
+					name: "Thành công",
 					value: summary.runs.success,
 					color: chartColors.pieSuccess,
 				},
 				{
-					name: "Failed",
+					name: "Thất bại",
 					value: summary.runs.failed,
 					color: chartColors.pieFailed,
 				},
 				{
-					name: "Other",
+					name: "Khác",
 					value:
 						summary.runs.cancelled +
 						summary.runs.in_progress +
@@ -143,7 +143,7 @@ export function Dashboard() {
 		: [];
 
 	// Get current month name for display
-	const currentMonth = new Date().toLocaleString("default", { month: "long" });
+	const currentMonth = new Date().toLocaleString("vi-VN", { month: "long" });
 
 	// Format total duration in hours and minutes
 	const formatTotalTime = (seconds: number): string => {
@@ -163,10 +163,10 @@ export function Dashboard() {
 			{/* Page Header */}
 			<div>
 				<h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">
-					Dashboard
+					Tổng quan
 				</h1>
 				<p className="text-gray-500 dark:text-gray-400 mt-1">
-					Monitor your CI/CD pipelines
+					Theo dõi pipeline CI/CD của bạn
 				</p>
 			</div>
 
@@ -188,13 +188,13 @@ export function Dashboard() {
 						<>
 							<span>{scores.length} repos</span>
 							<div className="flex justify-between gap-1 mt-0.5 text-sm text-gray-500 dark:text-gray-400 min-w-0">
-								<span className="truncate" title="Gold">{tierCounts.gold} gold</span>
-								<span className="truncate text-center" title="Silver">{tierCounts.silver} silver</span>
-								<span className="truncate text-right" title="Bronze">{tierCounts.bronze} bronze</span>
+								<span className="truncate" title="Vàng">{tierCounts.gold} vàng</span>
+								<span className="truncate text-center" title="Bạc">{tierCounts.silver} bạc</span>
+								<span className="truncate text-right" title="Đồng">{tierCounts.bronze} đồng</span>
 							</div>
 						</>
 					) : (
-						"Sync to grade repos"
+						"Sync để chấm điểm repo"
 					);
 				return (
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
@@ -203,31 +203,31 @@ export function Dashboard() {
 							value={summary?.workflows.total || 0}
 							icon={GitBranch}
 							color="primary"
-							subtitle={`${summary?.workflows.active || 0} active`}
+							subtitle={`${summary?.workflows.active || 0} đang hoạt động`}
 						/>
 						<StatCard
-							title={`Runs (${currentMonth})`}
+							title={`Runs (tháng ${currentMonth})`}
 							value={summary?.runs.total || 0}
 							icon={Play}
 							color="info"
-							subtitle={`${summary?.runs.success || 0} successful, ${summary?.runs.failed || 0} failed`}
+							subtitle={`${summary?.runs.success || 0} thành công, ${summary?.runs.failed || 0} thất bại`}
 						/>
 						<StatCard
-							title="Pending Runs"
+							title="Runs đang chờ"
 							value={(summary?.runs.in_progress || 0) + (summary?.runs.queued || 0)}
 							icon={Clock}
 							color="warning"
-							subtitle={`${summary?.runs.in_progress || 0} in progress, ${summary?.runs.queued || 0} queued`}
+							subtitle={`${summary?.runs.in_progress || 0} đang chạy, ${summary?.runs.queued || 0} đang chờ`}
 						/>
 						<StatCard
-							title={`Pipeline Time (${currentMonth})`}
+							title={`Thời gian pipeline (tháng ${currentMonth})`}
 							value={formatTotalTime(totalDuration)}
 							icon={Timer}
 							color="success"
-							subtitle={`${summary?.runs.total || 0} runs completed`}
+							subtitle={`${summary?.runs.total || 0} run đã hoàn thành`}
 						/>
 						<StatCard
-							title="Repository Health"
+							title="Sức khỏe repository"
 							value={scores.length > 0 ? `${Math.round(avgScore)}%` : "-"}
 							icon={Award}
 							color="info"
@@ -242,17 +242,17 @@ export function Dashboard() {
 				<div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
 					<Zap className="w-5 h-5 text-primary-500" />
 					<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-						Active Pipelines
+						Pipeline đang chạy
 					</h2>
 					{activePipelines.length > 0 && (
 						<span className="text-sm text-gray-500 dark:text-gray-400">
-							({activePipelines.length} running or pending)
+							({activePipelines.length} đang chạy hoặc chờ)
 						</span>
 					)}
 					<LiveStatus />
 					{dataUpdatedAt > 0 && (
 						<span className="text-xs text-gray-400 dark:text-gray-500">
-							Updated{" "}
+							Cập nhật{" "}
 							{formatRelativeTime(new Date(dataUpdatedAt).toISOString())}
 						</span>
 					)}
@@ -261,7 +261,7 @@ export function Dashboard() {
 						onClick={handleRefreshPipelines}
 						disabled={pipelinesRefetching || pipelinesRefreshingFromGitHub}
 						className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-primary-600 hover:bg-primary-50 disabled:opacity-50 dark:text-primary-400 dark:hover:bg-primary-900/30"
-						title="Check GitHub now (updates arrive automatically; use this if something looks stale)"
+						title="Kiểm tra GitHub ngay (cập nhật tự đến; dùng khi nghi dữ liệu cũ)"
 					>
 						<RefreshCw
 							className={cn(
@@ -270,7 +270,7 @@ export function Dashboard() {
 									"animate-spin",
 							)}
 						/>
-						Refresh
+						Làm mới
 					</button>
 				</div>
 				<div
@@ -285,7 +285,7 @@ export function Dashboard() {
 							<div className="flex flex-col items-center justify-center text-center">
 								<AlertTriangle className="w-10 h-10 text-amber-500 mb-3" />
 								<p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-									Could not load active pipelines.
+									Không tải được các pipeline đang chạy.
 								</p>
 								<button
 									type="button"
@@ -293,7 +293,7 @@ export function Dashboard() {
 									className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
 								>
 									<RefreshCw className="w-4 h-4" />
-									Try again
+									Thử lại
 								</button>
 							</div>
 						</div>
@@ -313,8 +313,8 @@ export function Dashboard() {
 									All pipelines complete
 								</h3>
 								<p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-4">
-									No pipelines are currently running or pending. When a workflow
-									starts, it will appear here with a live status indicator.
+									Hiện không có pipeline nào đang chạy hay chờ. Khi workflow
+									bắt đầu, nó sẽ xuất hiện ở đây kèm chỉ báo trạng thái trực tiếp.
 								</p>
 								<button
 									type="button"
@@ -328,7 +328,7 @@ export function Dashboard() {
 											pipelinesRefetching && "animate-spin",
 										)}
 									/>
-									Refresh
+									Làm mới
 								</button>
 							</div>
 						</div>
@@ -342,7 +342,7 @@ export function Dashboard() {
 				<div className="card min-w-0 p-4 sm:p-6 xl:col-span-2">
 					<div className="mb-4 flex items-center justify-between gap-3">
 						<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-							Run Trends
+							Xu hướng Run
 						</h2>
 						{trendsLoading && (
 							<Loader2 className="w-4 h-4 animate-spin text-primary-500" />
@@ -401,7 +401,7 @@ export function Dashboard() {
 										interval="preserveStartEnd"
 										tick={{ fontSize: 11, fill: chartColors.axisStroke }}
 										tickFormatter={(value) =>
-											new Date(value).toLocaleDateString("en-US", {
+											new Date(value).toLocaleDateString("vi-VN", {
 												month: "short",
 												day: "numeric",
 											})
@@ -423,21 +423,21 @@ export function Dashboard() {
 									<Area
 										type="monotone"
 										dataKey="successful_runs"
-										name="Successful"
+										name="Thành công"
 										stroke={chartColors.success}
 										fill="url(#successGradient)"
 									/>
 									<Area
 										type="monotone"
 										dataKey="failed_runs"
-										name="Failed"
+										name="Thất bại"
 										stroke={chartColors.failed}
 										fill="url(#failedGradient)"
 									/>
 								</AreaChart>
 							</ResponsiveContainer>
 						) : (
-							<EmptyState icon={Clock} message="No trend data available" />
+							<EmptyState icon={Clock} message="Chưa có dữ liệu xu hướng" />
 						)}
 					</div>
 				</div>
@@ -445,7 +445,7 @@ export function Dashboard() {
 				{/* Run Distribution Pie Chart */}
 				<div className="card min-w-0 p-4 sm:p-6">
 					<h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
-						Run Distribution
+						Phân bố Run
 					</h2>
 					<div className="h-48 min-w-0">
 						{summary && summary.runs.total > 0 ? (
@@ -475,7 +475,7 @@ export function Dashboard() {
 								</PieChart>
 							</ResponsiveContainer>
 						) : (
-							<EmptyState icon={Play} message="No runs yet" />
+							<EmptyState icon={Play} message="Chưa có run nào" />
 						)}
 					</div>
 					<div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2">
@@ -498,13 +498,13 @@ export function Dashboard() {
 			<div className="card">
 				<div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
 					<h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-						Recent Runs
+						Runs gần đây
 					</h2>
 					<Link
 						to="/runs"
 						className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
 					>
-						View all
+						Xem tất cả
 					</Link>
 				</div>
 				<div className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -525,7 +525,7 @@ export function Dashboard() {
 											{run.name}
 										</p>
 										<p className="truncate text-sm text-gray-500 dark:text-gray-400">
-											{run.repository?.full_name || "Unknown"} • {run.branch}
+											{run.repository?.full_name || "Không rõ"} • {run.branch}
 										</p>
 									</div>
 								</div>
@@ -541,7 +541,7 @@ export function Dashboard() {
 						))
 					) : (
 						<div className="px-6 py-8">
-							<EmptyState icon={Play} message="No recent runs" />
+							<EmptyState icon={Play} message="Không có run gần đây" />
 						</div>
 					)}
 				</div>
@@ -675,7 +675,7 @@ function PipelineCard({ pipeline }: { pipeline: WorkflowRun }) {
 							{truncate(pipeline.name, 28)}
 						</h3>
 						<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-							{pipeline.repository?.full_name || "Unknown repository"}
+							{pipeline.repository?.full_name || "Repository không rõ"}
 						</p>
 					</div>
 				</div>
@@ -738,12 +738,12 @@ function PipelineCard({ pipeline }: { pipeline: WorkflowRun }) {
 									<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
 									<span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
 								</span>
-								Running
+								Đang chạy
 							</>
 						) : (
 							<>
 								<Clock className="w-3 h-3" />
-								Pending
+								Đang chờ
 							</>
 						)}
 					</span>

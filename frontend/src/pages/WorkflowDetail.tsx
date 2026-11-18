@@ -36,7 +36,7 @@ export function WorkflowDetail() {
   if (!workflow) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">Workflow not found</p>
+        <p className="text-gray-500 dark:text-gray-400">Không tìm thấy workflow</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function WorkflowDetail() {
           <Link
             to="/workflows"
             className="shrink-0 rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-            aria-label="Back to workflows"
+            aria-label="Quay lại danh sách workflow"
           >
             <ArrowLeft className="h-5 w-5 text-gray-500" />
           </Link>
@@ -65,26 +65,26 @@ export function WorkflowDetail() {
             className="btn-secondary inline-flex w-fit shrink-0 items-center gap-2"
           >
             <ExternalLink className="h-4 w-4" />
-            View on GitHub
+            Xem trên GitHub
           </a>
         )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="card p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Total Runs</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Tổng số run</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {workflow.total_runs || 0}
           </p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Success Rate</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Tỉ lệ thành công</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {workflow.success_rate?.toFixed(1) || 0}%
           </p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Avg Duration</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Thời lượng trung bình</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {formatDuration(workflow.avg_duration_seconds)}
           </p>
@@ -93,7 +93,7 @@ export function WorkflowDetail() {
 
       <div className="card">
         <div className="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Runs</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Runs gần đây</h2>
         </div>
         <div className="divide-y divide-gray-100 dark:divide-gray-700">
           {runsData?.data && runsData.data.length > 0 ? (
@@ -127,7 +127,7 @@ export function WorkflowDetail() {
           ) : (
             <div className="px-6 py-8 text-center">
               <Clock className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" />
-              <p className="text-gray-500 dark:text-gray-400">No runs yet</p>
+              <p className="text-gray-500 dark:text-gray-400">Chưa có run nào</p>
             </div>
           )}
         </div>

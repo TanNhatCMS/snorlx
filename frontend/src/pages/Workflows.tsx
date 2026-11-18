@@ -38,7 +38,7 @@ export function Workflows() {
         <div className="min-w-0">
           <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Workflows</h1>
           <p className="mt-1 text-gray-500 dark:text-gray-400">
-            All GitHub Actions workflows across your repositories
+            Tất cả GitHub Actions workflows trên các repository của bạn
           </p>
         </div>
         <div className="relative w-full sm:w-72 sm:shrink-0">
@@ -47,7 +47,7 @@ export function Workflows() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search workflows..."
+            placeholder="Tìm workflows..."
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-10 text-sm focus:border-primary-500 focus:outline-hidden focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           />
           {search && (
@@ -55,7 +55,7 @@ export function Workflows() {
               type="button"
               onClick={() => setSearch('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label="Clear search"
+              aria-label="Xóa tìm kiếm"
             >
               <X className="h-4 w-4" />
             </button>
@@ -75,7 +75,7 @@ export function Workflows() {
                         {workflow.name}
                       </p>
                       <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                        {workflow.repository?.full_name || 'Unknown'}
+                        {workflow.repository?.full_name || 'Không rõ'}
                       </p>
                     </Link>
                     <WorkflowStatusBadge state={workflow.state} lastRun={workflow.last_run} />
@@ -83,12 +83,12 @@ export function Workflows() {
                   <p className="break-all text-xs text-gray-500 dark:text-gray-400">{workflow.path}</p>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                     <span>
-                      {workflow.last_run ? formatRelativeTime(workflow.last_run.started_at) : 'Never run'}
+                      {workflow.last_run ? formatRelativeTime(workflow.last_run.started_at) : 'Chưa chạy lần nào'}
                     </span>
                     <span>
                       {workflow.success_rate !== undefined
-                        ? `${workflow.success_rate.toFixed(0)}% success`
-                        : 'No success rate'}
+                        ? `${workflow.success_rate.toFixed(0)}% thành công`
+                        : 'Chưa có tỉ lệ'}
                     </span>
                     {workflow.html_url && (
                       <a
@@ -111,9 +111,9 @@ export function Workflows() {
                   <tr>
                     <th>Workflow</th>
                     <th>Repository</th>
-                    <th className="hidden lg:table-cell">Last Run</th>
-                    <th className="text-center">Status</th>
-                    <th className="hidden xl:table-cell">Success Rate</th>
+                    <th className="hidden lg:table-cell">Lần chạy cuối</th>
+                    <th className="text-center">Trạng thái</th>
+                    <th className="hidden xl:table-cell">Tỉ lệ thành công</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -138,7 +138,7 @@ export function Workflows() {
                       </td>
                       <td>
                         <span className="text-gray-600 dark:text-gray-300">
-                          {workflow.repository?.full_name || 'Unknown'}
+                          {workflow.repository?.full_name || 'Không rõ'}
                         </span>
                       </td>
                       <td className="hidden lg:table-cell">
@@ -147,7 +147,7 @@ export function Workflows() {
                             {formatRelativeTime(workflow.last_run.started_at)}
                           </span>
                         ) : (
-                          <span className="text-gray-400">Never</span>
+                          <span className="text-gray-400">Chưa có</span>
                         )}
                       </td>
                       <td className="text-center">
@@ -174,7 +174,7 @@ export function Workflows() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-                            aria-label="Open workflow on GitHub"
+                            aria-label="Mở workflow trên GitHub"
                           >
                             <ExternalLink className="h-4 w-4 text-gray-400" />
                           </a>
@@ -189,9 +189,9 @@ export function Workflows() {
         ) : (
           <div className="px-4 py-8 text-center">
             <Workflow className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" />
-            <p className="text-gray-500 dark:text-gray-400">No workflows found</p>
+            <p className="text-gray-500 dark:text-gray-400">Không tìm thấy workflow nào</p>
             <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
-              Sync your repositories to see workflows
+              Sync repositories để xem workflows
             </p>
           </div>
         )}
@@ -204,18 +204,18 @@ function WorkflowStatusBadge({ state, lastRun }: { state: string; lastRun?: { co
   const badgeBase = "w-24 justify-center";
   
   if (state === 'disabled') {
-    return <span className={`badge-neutral ${badgeBase}`}>Disabled</span>;
+    return <span className={`badge-neutral ${badgeBase}`}>Đã tắt</span>;
   }
 
   if (!lastRun) {
-    return <span className={`badge-neutral ${badgeBase}`}>No runs</span>;
+    return <span className={`badge-neutral ${badgeBase}`}>Chưa có run</span>;
   }
 
   if (lastRun.conclusion === 'success') {
     return (
       <span className={`badge-success ${badgeBase} gap-1`}>
         <CheckCircle className="w-3 h-3" />
-        Success
+        Thành công
       </span>
     );
   }
@@ -224,7 +224,7 @@ function WorkflowStatusBadge({ state, lastRun }: { state: string; lastRun?: { co
     return (
       <span className={`badge-danger ${badgeBase} gap-1`}>
         <XCircle className="w-3 h-3" />
-        Failed
+        Thất bại
       </span>
     );
   }
@@ -232,7 +232,7 @@ function WorkflowStatusBadge({ state, lastRun }: { state: string; lastRun?: { co
   return (
     <span className={`badge-info ${badgeBase} gap-1`}>
       <Clock className="w-3 h-3" />
-      Running
+      Đang chạy
     </span>
   );
 }

@@ -16,178 +16,178 @@ import { useTheme } from '../context/ThemeContext';
 import { cn } from '../lib/utils';
 
 const SCORE_CATEGORIES = [
-  { key: 'security_score', label: 'Security' },
-  { key: 'testing_score', label: 'Testing' },
+  { key: 'security_score', label: 'Bảo mật' },
+  { key: 'testing_score', label: 'Kiểm thử' },
   { key: 'cicd_score', label: 'CI/CD' },
-  { key: 'documentation_score', label: 'Documentation' },
-  { key: 'code_quality_score', label: 'Code Quality' },
-  { key: 'maintenance_score', label: 'Maintenance' },
-  { key: 'community_score', label: 'Community' },
+  { key: 'documentation_score', label: 'Tài liệu' },
+  { key: 'code_quality_score', label: 'Chất lượng code' },
+  { key: 'maintenance_score', label: 'Bảo trì' },
+  { key: 'community_score', label: 'Cộng đồng' },
 ] as const;
 
 const CHECK_TO_CATEGORY: Record<string, string> = {
-  branch_protection: 'Security',
-  requires_reviews: 'Security',
-  requires_status_checks: 'Security',
-  enforce_admins: 'Security',
-  no_force_pushes: 'Security',
-  dependabot_enabled: 'Security',
-  code_scanning_enabled: 'Security',
-  security_md: 'Security',
-  test_directory: 'Testing',
-  test_config: 'Testing',
-  ci_workflow_tests: 'Testing',
+  branch_protection: 'Bảo mật',
+  requires_reviews: 'Bảo mật',
+  requires_status_checks: 'Bảo mật',
+  enforce_admins: 'Bảo mật',
+  no_force_pushes: 'Bảo mật',
+  dependabot_enabled: 'Bảo mật',
+  code_scanning_enabled: 'Bảo mật',
+  security_md: 'Bảo mật',
+  test_directory: 'Kiểm thử',
+  test_config: 'Kiểm thử',
+  ci_workflow_tests: 'Kiểm thử',
   has_workflows: 'CI/CD',
   status_checks_required: 'CI/CD',
-  readme_exists: 'Documentation',
-  readme_size: 'Documentation',
-  license_exists: 'Documentation',
-  contributing: 'Documentation',
-  changelog: 'Documentation',
-  description_set: 'Documentation',
-  linter_config: 'Code Quality',
-  editorconfig: 'Code Quality',
-  type_config: 'Code Quality',
-  dockerfile: 'Code Quality',
-  pre_commit: 'Code Quality',
-  pushed_recently_30: 'Maintenance',
-  pushed_recently_90: 'Maintenance',
-  not_archived: 'Maintenance',
-  topics_set: 'Community',
-  issue_templates: 'Community',
-  pr_template: 'Community',
-  codeowners: 'Community',
-  code_of_conduct: 'Community',
+  readme_exists: 'Tài liệu',
+  readme_size: 'Tài liệu',
+  license_exists: 'Tài liệu',
+  contributing: 'Tài liệu',
+  changelog: 'Tài liệu',
+  description_set: 'Tài liệu',
+  linter_config: 'Chất lượng code',
+  editorconfig: 'Chất lượng code',
+  type_config: 'Chất lượng code',
+  dockerfile: 'Chất lượng code',
+  pre_commit: 'Chất lượng code',
+  pushed_recently_30: 'Bảo trì',
+  pushed_recently_90: 'Bảo trì',
+  not_archived: 'Bảo trì',
+  topics_set: 'Cộng đồng',
+  issue_templates: 'Cộng đồng',
+  pr_template: 'Cộng đồng',
+  codeowners: 'Cộng đồng',
+  code_of_conduct: 'Cộng đồng',
 };
 
 const CHECK_META: Record<string, { description: string; remediation: string }> = {
   branch_protection: {
-    description: 'Default branch has protection rules to prevent force pushes and require reviews.',
-    remediation: 'Go to Settings → Branches → Add branch protection rule for the default branch. Enable "Require a pull request before merging" and restrict force pushes.',
+    description: 'Nhánh mặc định có rule bảo vệ để chặn force push và yêu cầu review.',
+    remediation: 'Vào Settings → Branches → Thêm branch protection rule cho nhánh mặc định. Bật "Require a pull request before merging" và chặn force push.',
   },
   requires_reviews: {
-    description: 'Branch protection requires at least one approving review before merging.',
-    remediation: 'In the branch protection rule, enable "Require approvals" and set required approving review count to 1 or more.',
+    description: 'Branch protection yêu cầu ít nhất một review duyệt trước khi merge.',
+    remediation: 'Trong branch protection rule, bật "Require approvals" và đặt số review duyệt tối thiểu từ 1 trở lên.',
   },
   requires_status_checks: {
-    description: 'Branch protection requires CI status checks to pass before merging.',
-    remediation: 'In the branch protection rule, enable "Require status checks to pass" and add the relevant workflow or check names.',
+    description: 'Branch protection yêu cầu CI status check phải pass trước khi merge.',
+    remediation: 'Trong branch protection rule, bật "Require status checks to pass" và thêm tên workflow hoặc check liên quan.',
   },
   enforce_admins: {
-    description: 'Branch protection rules apply to administrators as well.',
-    remediation: 'In the branch protection rule, enable "Do not allow bypassing the above settings" (enforce for admins).',
+    description: 'Branch protection rule áp dụng cả cho administrator.',
+    remediation: 'Trong branch protection rule, bật "Do not allow bypassing the above settings" (áp dụng cho admin).',
   },
   no_force_pushes: {
-    description: 'Force pushes to the branch are disabled.',
-    remediation: 'In the branch protection rule, set "Allow force pushes" to "Do not allow force pushes".',
+    description: 'Force push lên nhánh đã bị chặn.',
+    remediation: 'Trong branch protection rule, đặt "Allow force pushes" thành "Do not allow force pushes".',
   },
   dependabot_enabled: {
-    description: 'Dependabot alerts are enabled to track vulnerable dependencies.',
-    remediation: 'Go to Settings → Security → Code security and analysis → Enable "Dependabot alerts".',
+    description: 'Dependabot alerts đã bật để theo dõi dependency có lỗ hổng.',
+    remediation: 'Vào Settings → Security → Code security and analysis → Bật "Dependabot alerts".',
   },
   code_scanning_enabled: {
-    description: 'Code scanning (e.g. CodeQL) is configured to find security issues.',
-    remediation: 'Go to Settings → Security → Code security and analysis → Set up Code scanning (e.g. default CodeQL).',
+    description: 'Code scanning (vd. CodeQL) được cấu hình để tìm vấn đề bảo mật.',
+    remediation: 'Vào Settings → Security → Code security and analysis → Cấu hình Code scanning (vd. CodeQL mặc định).',
   },
   security_md: {
-    description: 'A SECURITY.md file describes how to report vulnerabilities.',
-    remediation: 'Add a SECURITY.md file in the repo root or in .github/ describing your security policy and how to report issues.',
+    description: 'File SECURITY.md mô tả cách báo cáo lỗ hổng.',
+    remediation: 'Thêm file SECURITY.md ở gốc repo hoặc trong .github/ mô tả chính sách bảo mật và cách báo cáo vấn đề.',
   },
   test_directory: {
-    description: 'Repository has a dedicated directory for tests (e.g. test/, tests/, spec/).',
-    remediation: 'Add a test directory (test, tests, spec, or __tests__) and place tests there.',
+    description: 'Repository có thư mục riêng cho test (vd. test/, tests/, spec/).',
+    remediation: 'Thêm thư mục test (test, tests, spec, hoặc __tests__) và đặt test vào đó.',
   },
   test_config: {
-    description: 'A test framework config file is present (e.g. jest, pytest, vitest).',
-    remediation: 'Add a config file for your test framework (e.g. jest.config.js, pytest.ini, vitest.config.ts).',
+    description: 'Đã có file cấu hình test framework (vd. jest, pytest, vitest).',
+    remediation: 'Thêm file cấu hình cho test framework (vd. jest.config.js, pytest.ini, vitest.config.ts).',
   },
   ci_workflow_tests: {
-    description: 'At least one CI workflow runs tests (name contains test, ci, or build).',
-    remediation: 'Add or rename a workflow under .github/workflows/ so it runs tests and its name suggests testing (e.g. "CI" or "Tests").',
+    description: 'Ít nhất một CI workflow chạy test (tên chứa test, ci, hoặc build).',
+    remediation: 'Thêm hoặc đổi tên một workflow trong .github/workflows/ để chạy test và tên gợi ý việc test (vd. "CI" hoặc "Tests").',
   },
   has_workflows: {
-    description: 'Repository has at least one GitHub Actions workflow.',
-    remediation: 'Add one or more workflow files under .github/workflows/ (e.g. ci.yml) to automate build or tests.',
+    description: 'Repository có ít nhất một GitHub Actions workflow.',
+    remediation: 'Thêm một hoặc nhiều file workflow vào .github/workflows/ (vd. ci.yml) để tự động hóa build hoặc test.',
   },
   status_checks_required: {
-    description: 'Branch protection requires status checks, ensuring CI runs before merge.',
-    remediation: 'In the branch protection rule, enable "Require status checks" and list the workflow or check names.',
+    description: 'Branch protection yêu cầu status check, đảm bảo CI chạy trước khi merge.',
+    remediation: 'Trong branch protection rule, bật "Require status checks" và liệt kê tên workflow hoặc check.',
   },
   readme_exists: {
-    description: 'A README file exists to describe the project.',
-    remediation: 'Add a README.md file in the repository root with project overview, setup, and usage.',
+    description: 'Đã có file README mô tả dự án.',
+    remediation: 'Thêm README.md ở gốc repository với tổng quan dự án, cách cài đặt và sử dụng.',
   },
   readme_size: {
-    description: 'README has sufficient content (e.g. at least ~500 bytes).',
-    remediation: 'Expand README.md with a clear description, installation steps, and usage examples.',
+    description: 'README có đủ nội dung (vd. ít nhất ~500 byte).',
+    remediation: 'Mở rộng README.md với mô tả rõ ràng, các bước cài đặt và ví dụ sử dụng.',
   },
   license_exists: {
-    description: 'A LICENSE file is present with a valid SPDX identifier.',
-    remediation: 'Add a LICENSE file in the root (e.g. MIT, Apache-2.0) so reuse terms are clear.',
+    description: 'Đã có file LICENSE với mã SPDX hợp lệ.',
+    remediation: 'Thêm LICENSE ở gốc (vd. MIT, Apache-2.0) để điều khoản tái sử dụng rõ ràng.',
   },
   contributing: {
-    description: 'A CONTRIBUTING file explains how to contribute.',
-    remediation: 'Add CONTRIBUTING.md or CONTRIBUTING in the root with contribution guidelines and process.',
+    description: 'File CONTRIBUTING giải thích cách đóng góp.',
+    remediation: 'Thêm CONTRIBUTING.md hoặc CONTRIBUTING ở gốc với hướng dẫn và quy trình đóng góp.',
   },
   changelog: {
-    description: 'A CHANGELOG file documents version history.',
-    remediation: 'Add CHANGELOG.md in the root and keep it updated with notable changes per release.',
+    description: 'File CHANGELOG ghi lại lịch sử phiên bản.',
+    remediation: 'Thêm CHANGELOG.md ở gốc và cập nhật các thay đổi đáng chú ý theo từng release.',
   },
   description_set: {
-    description: 'Repository has a short description set on GitHub.',
-    remediation: 'Edit the repository description on the main GitHub repo page (under the name).',
+    description: 'Repository đã đặt mô tả ngắn trên GitHub.',
+    remediation: 'Sửa mô tả repository trên trang chính của repo GitHub (phía dưới tên).',
   },
   linter_config: {
-    description: 'A linter or formatter config is present (e.g. ESLint, Prettier, Rubocop).',
-    remediation: 'Add a config file for your language (e.g. .eslintrc.json, .prettierrc, .rubocop.yml).',
+    description: 'Đã có cấu hình linter/formatter (vd. ESLint, Prettier, Rubocop).',
+    remediation: 'Thêm file cấu hình cho ngôn ngữ của bạn (vd. .eslintrc.json, .prettierrc, .rubocop.yml).',
   },
   editorconfig: {
-    description: 'An .editorconfig file enforces consistent editor settings.',
-    remediation: 'Add .editorconfig in the root to define indentation, charset, and line endings.',
+    description: 'File .editorconfig ép thống nhất cấu hình editor.',
+    remediation: 'Thêm .editorconfig ở gốc để định nghĩa indentation, charset và line ending.',
   },
   type_config: {
-    description: 'Type-checking config is present (e.g. tsconfig for TypeScript).',
-    remediation: 'Add tsconfig.json (or equivalent) if using TypeScript or other typed languages.',
+    description: 'Đã có cấu hình kiểm tra kiểu (vd. tsconfig cho TypeScript).',
+    remediation: 'Thêm tsconfig.json (hoặc tương đương) nếu dùng TypeScript hoặc ngôn ngữ có kiểu khác.',
   },
   dockerfile: {
-    description: 'A Dockerfile is present for containerized build or run.',
-    remediation: 'Add a Dockerfile in the root (or a dedicated directory) for container builds.',
+    description: 'Đã có Dockerfile để build hoặc chạy trong container.',
+    remediation: 'Thêm Dockerfile ở gốc (hoặc thư mục riêng) để build container.',
   },
   pre_commit: {
-    description: 'Pre-commit hooks are configured (e.g. .pre-commit-config.yaml).',
-    remediation: 'Add .pre-commit-config.yaml and install pre-commit to run checks before commits.',
+    description: 'Pre-commit hook đã được cấu hình (vd. .pre-commit-config.yaml).',
+    remediation: 'Thêm .pre-commit-config.yaml và cài pre-commit để chạy kiểm tra trước mỗi commit.',
   },
   pushed_recently_30: {
-    description: 'Repository had at least one push in the last 30 days.',
-    remediation: 'Make a commit and push to the default branch to show recent activity.',
+    description: 'Repository có ít nhất một lần push trong 30 ngày qua.',
+    remediation: 'Commit và push lên nhánh mặc định để thể hiện hoạt động gần đây.',
   },
   pushed_recently_90: {
-    description: 'Repository had at least one push in the last 90 days.',
-    remediation: 'Make a commit and push to the default branch to show recent activity.',
+    description: 'Repository có ít nhất một lần push trong 90 ngày qua.',
+    remediation: 'Commit và push lên nhánh mặc định để thể hiện hoạt động gần đây.',
   },
   not_archived: {
-    description: 'Repository is not archived and is actively maintained.',
-    remediation: 'Unarchive the repository from Settings → Danger Zone if it should be active again.',
+    description: 'Repository không bị archive và vẫn được bảo trì.',
+    remediation: 'Unarchive repository trong Settings → Danger Zone nếu cần hoạt động lại.',
   },
   topics_set: {
-    description: 'Repository has one or more topics (labels) set on GitHub.',
-    remediation: 'Add topics on the main repo page (click the gear next to "About") to improve discoverability.',
+    description: 'Repository có một hoặc nhiều topics (nhãn) trên GitHub.',
+    remediation: 'Thêm topics trên trang chính repo (nhấn bánh răng cạnh "About") để dễ được tìm thấy.',
   },
   issue_templates: {
-    description: 'Issue templates are configured for structured bug reports or feature requests.',
-    remediation: 'Add issue templates under .github/ISSUE_TEMPLATE/ or use the single .github/ISSUE_TEMPLATE.md file.',
+    description: 'Issue template được cấu hình cho báo lỗi hoặc đề xuất tính năng có cấu trúc.',
+    remediation: 'Thêm issue template vào .github/ISSUE_TEMPLATE/ hoặc dùng file .github/ISSUE_TEMPLATE.md đơn.',
   },
   pr_template: {
-    description: 'A pull request template is configured.',
-    remediation: 'Add .github/PULL_REQUEST_TEMPLATE.md or a file in .github/PULL_REQUEST_TEMPLATE/ to guide PR descriptions.',
+    description: 'Pull request template đã được cấu hình.',
+    remediation: 'Thêm .github/PULL_REQUEST_TEMPLATE.md hoặc file trong .github/PULL_REQUEST_TEMPLATE/ để hướng dẫn viết PR.',
   },
   codeowners: {
-    description: 'A CODEOWNERS file defines owners for paths in the repo.',
-    remediation: 'Add CODEOWNERS in the root or .github/ to assign owners (e.g. * @team/backend).',
+    description: 'File CODEOWNERS định nghĩa owner cho các đường dẫn trong repo.',
+    remediation: 'Thêm CODEOWNERS ở gốc hoặc .github/ để gán owner (vd. * @team/backend).',
   },
   code_of_conduct: {
-    description: 'A code of conduct file sets community behavior expectations.',
-    remediation: 'Add CODE_OF_CONDUCT.md in the root or use GitHub\'s template from Insights → Community.',
+    description: 'File code of conduct đặt kỳ vọng hành vi cho cộng đồng.',
+    remediation: 'Add CODE_OF_CONDUCT.md in the root or dùng template của GitHub từ Insights → Community.',
   },
 };
 
@@ -217,7 +217,7 @@ function CheckBox({ check, pass }: { check: string; pass: boolean }) {
           )}
           {!pass && meta?.remediation && (
             <p className="text-xs text-amber-700 dark:text-amber-300 border-t border-gray-200 dark:border-gray-600 pt-1.5 mt-1.5">
-              <span className="font-medium">Remediation:</span> {meta.remediation}
+              <span className="font-medium">Cách khắc phục:</span> {meta.remediation}
             </p>
           )}
         </div>
@@ -270,7 +270,7 @@ export function RepositoryDetail() {
   if (!repo) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">Repository not found</p>
+        <p className="text-gray-500 dark:text-gray-400">Không tìm thấy repository</p>
       </div>
     );
   }
@@ -283,7 +283,7 @@ export function RepositoryDetail() {
           <Link
             to="/repositories"
             className="shrink-0 rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-            aria-label="Back to repositories"
+            aria-label="Quay lại danh sách repository"
           >
             <ArrowLeft className="h-5 w-5 text-gray-500" />
           </Link>
@@ -306,7 +306,7 @@ export function RepositoryDetail() {
           className="btn-secondary inline-flex w-fit shrink-0 items-center gap-2"
         >
           <ExternalLink className="w-4 h-4" />
-          View on GitHub
+          Xem trên GitHub
         </a>
       </div>
 
@@ -320,7 +320,7 @@ export function RepositoryDetail() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Default Branch</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Nhánh mặc định</p>
           <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{repo.default_branch}</p>
         </div>
         <div className="card p-4">
@@ -328,9 +328,9 @@ export function RepositoryDetail() {
           <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{workflows?.length || 0}</p>
         </div>
         <div className="card p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Visibility</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Hiển thị</p>
           <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {repo.is_private ? 'Private' : 'Public'}
+            {repo.is_private ? 'Riêng tư' : 'Công khai'}
           </p>
         </div>
       </div>
@@ -340,11 +340,11 @@ export function RepositoryDetail() {
         <div className="card">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Repository Score</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Điểm repository</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                 {score
-                  ? `Last scanned: ${new Date(score.scanned_at).toLocaleString()}`
-                  : 'No score yet. Sync to grade this repository.'}
+                  ? `Quét lần cuối: ${new Date(score.scanned_at).toLocaleString()}`
+                  : 'Chưa có điểm. Sync để chấm điểm repository này.'}
               </p>
             </div>
             <button
@@ -352,16 +352,16 @@ export function RepositoryDetail() {
               onClick={() => refreshGradeMutation.mutate()}
               disabled={refreshGradeMutation.isPending}
               className="btn btn-secondary flex items-center gap-2"
-              title="Re-check on GitHub and update grading"
+              title="Kiểm tra lại trên GitHub và cập nhật điểm"
             >
               <RefreshCw className={cn('w-4 h-4', refreshGradeMutation.isPending && 'animate-spin')} />
-              {refreshGradeMutation.isPending ? 'Checking…' : 'Refresh grade'}
+              {refreshGradeMutation.isPending ? 'Đang kiểm tra…' : 'Làm mới điểm'}
             </button>
           </div>
           <div className="space-y-6 p-4 sm:p-6">
             {!score ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Click &quot;Refresh grade&quot; to check this repository on GitHub and compute its score.
+                Nhấn &quot;Làm mới điểm&quot; để kiểm tra repository này trên GitHub và tính điểm.
               </p>
             ) : (
               <>
@@ -415,7 +415,7 @@ export function RepositoryDetail() {
                     tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 10 }}
                   />
                   <Radar
-                    name="Score"
+                    name="Điểm"
                     dataKey="score"
                     stroke={isDark ? '#34cb6f' : '#2db865'}
                     fill={isDark ? '#34cb6f' : '#2db865'}
@@ -428,7 +428,7 @@ export function RepositoryDetail() {
                       borderRadius: '8px',
                     }}
                     labelStyle={{ color: isDark ? '#e5e7eb' : '#111827' }}
-                    formatter={(value: unknown) => [typeof value === 'number' ? `${value.toFixed(0)}%` : String(value), 'Score'] as [React.ReactNode, string]}
+                    formatter={(value: unknown) => [typeof value === 'number' ? `${value.toFixed(0)}%` : String(value), 'Điểm'] as [React.ReactNode, string]}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -445,12 +445,12 @@ export function RepositoryDetail() {
                   ) : (
                     <ChevronRight className="w-4 h-4" />
                   )}
-                  Check details
+                  Chi tiết kiểm tra
                 </button>
                 {checksExpanded && (() => {
-                  const order = ['Security', 'Testing', 'CI/CD', 'Documentation', 'Code Quality', 'Maintenance', 'Community'];
+                  const order = ['Bảo mật', 'Kiểm thử', 'CI/CD', 'Tài liệu', 'Chất lượng code', 'Bảo trì', 'Cộng đồng'];
                   const byCategory = Object.entries(score.check_results).reduce<Record<string, [string, boolean][]>>((acc, [check, pass]) => {
-                    const cat = CHECK_TO_CATEGORY[check] ?? 'Other';
+                    const cat = CHECK_TO_CATEGORY[check] ?? 'Khác';
                     if (!acc[cat]) acc[cat] = [];
                     acc[cat].push([check, pass]);
                     return acc;
@@ -469,13 +469,13 @@ export function RepositoryDetail() {
                           </div>
                         </div>
                       ))}
-                      {byCategory['Other']?.length > 0 && (
+                      {byCategory['Khác']?.length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                            Other
+                            Khác
                           </p>
                           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                            {byCategory['Other'].map(([check, pass]) => (
+                            {byCategory['Khác'].map(([check, pass]) => (
                               <CheckBox key={check} check={check} pass={pass} />
                             ))}
                           </div>
@@ -522,7 +522,7 @@ export function RepositoryDetail() {
           ) : (
             <div className="px-6 py-8 text-center">
               <Workflow className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-500 dark:text-gray-400">No workflows found</p>
+              <p className="text-gray-500 dark:text-gray-400">Không tìm thấy workflow nào</p>
             </div>
           )}
         </div>

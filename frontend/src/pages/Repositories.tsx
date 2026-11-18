@@ -57,7 +57,7 @@ export function Repositories() {
         <div className="min-w-0">
           <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Repositories</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            All repositories with GitHub Actions workflows
+            Tất cả repository có GitHub Actions workflows
           </p>
         </div>
         <div className="relative w-full sm:w-72 sm:shrink-0">
@@ -66,7 +66,7 @@ export function Repositories() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search repositories..."
+            placeholder="Tìm repositories..."
             className="w-full pl-10 pr-10 py-2 text-sm rounded-lg border border-gray-300 bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-hidden dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
           />
           {search && (
@@ -85,7 +85,7 @@ export function Repositories() {
         {isFetching && (
           <div className="absolute right-0 top-0 z-10 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
             <Loader2 className="w-4 h-4 animate-spin" />
-            Updating…
+            Đang cập nhật…
           </div>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -140,7 +140,7 @@ export function Repositories() {
                       <>
                         <span
                           className={`badge ${tierClass}`}
-                          title="Repository score tier"
+                          title="Hạng điểm repository"
                         >
                           {tier}
                         </span>
@@ -161,10 +161,10 @@ export function Repositories() {
           <div className="col-span-full text-center py-12">
             <FolderGit2 className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
             <p className="text-gray-500 dark:text-gray-400">
-              {searchQuery ? 'No repositories match your search' : 'No repositories found'}
+              {searchQuery ? 'Không có repository nào khớp tìm kiếm' : 'Không tìm thấy repository nào'}
             </p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              {searchQuery ? 'Try a different search term' : 'Sync your repositories to get started'}
+              {searchQuery ? 'Thử từ khóa khác' : 'Sync repositories của bạn để bắt đầu'}
             </p>
           </div>
         )}
@@ -175,12 +175,12 @@ export function Repositories() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-wrap items-center gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {(currentPage - 1) * (pagination?.page_size ?? perPage) + 1}–
-              {Math.min(currentPage * (pagination?.page_size ?? perPage), total)} of {total}
-              {searchQuery ? ' matching' : ''} repositories
+              Hiển thị {(currentPage - 1) * (pagination?.page_size ?? perPage) + 1}–
+              {Math.min(currentPage * (pagination?.page_size ?? perPage), total)} trong tổng số {total}
+              {searchQuery ? ' khớp' : ''} repository
             </p>
             <label className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>Per page</span>
+              <span>Mỗi trang</span>
               <select
                 value={perPage}
                 onChange={(e) => handlePerPageChange(Number(e.target.value))}
@@ -202,10 +202,10 @@ export function Repositories() {
               className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <ChevronLeft className="w-4 h-4" />
-              Previous
+              Trước
             </button>
             <span className="text-sm text-gray-500 dark:text-gray-400 px-2">
-              Page {currentPage} of {totalPages}
+              Trang {currentPage} / {totalPages}
             </span>
             <button
               type="button"
@@ -213,7 +213,7 @@ export function Repositories() {
               disabled={currentPage >= totalPages}
               className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
-              Next
+              Sau
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>

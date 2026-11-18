@@ -43,12 +43,12 @@ describe("cn", () => {
 
 describe("formatDate", () => {
   it("returns Never for null", () => {
-    expect(formatDate(null)).toBe("Never");
+    expect(formatDate(null)).toBe("Chưa có");
   });
 
   it("formats a date string", () => {
     const result = formatDate("2024-06-15T10:00:00Z");
-    expect(result).toMatch(/Jun/);
+    expect(result).toMatch(/6/);
     expect(result).toMatch(/2024/);
     expect(result).toMatch(/15/);
   });
@@ -62,12 +62,12 @@ describe("formatDate", () => {
 
 describe("formatDateTime", () => {
   it("returns Never for null", () => {
-    expect(formatDateTime(null)).toBe("Never");
+    expect(formatDateTime(null)).toBe("Chưa có");
   });
 
   it("formats a datetime string with time", () => {
     const result = formatDateTime("2024-06-15T14:30:00Z");
-    expect(result).toMatch(/Jun/);
+    expect(result).toMatch(/6/);
     expect(result).toMatch(/2024/);
   });
 
@@ -87,39 +87,39 @@ describe("formatRelativeTime", () => {
     vi.useRealTimers();
   });
 
-  it("returns 'just now' for very recent dates", () => {
+  it("returns 'vừa xong' for very recent dates", () => {
     const now = new Date("2024-06-15T12:00:00Z");
     vi.setSystemTime(now);
     const result = formatRelativeTime("2024-06-15T12:00:30Z"); // 30s ago
-    expect(result).toBe("just now");
+    expect(result).toBe("vừa xong");
   });
 
   it("returns minutes ago for dates within the last hour", () => {
     const now = new Date("2024-06-15T12:30:00Z");
     vi.setSystemTime(now);
     const result = formatRelativeTime("2024-06-15T12:00:00Z"); // 30 min ago
-    expect(result).toBe("30m ago");
+    expect(result).toBe("30 phút trước");
   });
 
   it("returns hours ago for dates within the last day", () => {
     const now = new Date("2024-06-15T16:00:00Z");
     vi.setSystemTime(now);
     const result = formatRelativeTime("2024-06-15T12:00:00Z"); // 4h ago
-    expect(result).toBe("4h ago");
+    expect(result).toBe("4 giờ trước");
   });
 
   it("returns days ago for dates within the last week", () => {
     const now = new Date("2024-06-15T12:00:00Z");
     vi.setSystemTime(now);
     const result = formatRelativeTime("2024-06-12T12:00:00Z"); // 3d ago
-    expect(result).toBe("3d ago");
+    expect(result).toBe("3 ngày trước");
   });
 
   it("falls back to formatted date for dates older than a week", () => {
     const now = new Date("2024-06-15T12:00:00Z");
     vi.setSystemTime(now);
     const result = formatRelativeTime("2024-01-01T00:00:00Z");
-    expect(result).toMatch(/Jan/);
+    expect(result).toMatch(/thg 1/);
     expect(result).toMatch(/2024/);
   });
 });

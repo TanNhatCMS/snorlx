@@ -52,9 +52,9 @@ export function Runs() {
     <div className="min-w-0 space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Workflow Runs</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-gray-100">Danh sách Runs</h1>
           <p className="mt-1 text-gray-500 dark:text-gray-400">
-            All workflow runs across your repositories
+            Tất cả workflow run trên các repository của bạn
           </p>
         </div>
         <div className="relative w-full sm:w-72 sm:shrink-0">
@@ -63,7 +63,7 @@ export function Runs() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search runs..."
+            placeholder="Tìm runs..."
             className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-10 text-sm focus:border-primary-500 focus:outline-hidden focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
           />
           {search && (
@@ -71,7 +71,7 @@ export function Runs() {
               type="button"
               onClick={() => setSearch('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label="Clear search"
+              aria-label="Xóa tìm kiếm"
             >
               <X className="h-4 w-4" />
             </button>
@@ -83,38 +83,38 @@ export function Runs() {
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Bộ lọc</span>
           </div>
           <select
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             className="input w-full sm:w-40"
-            aria-label="Status"
+            aria-label="Trạng thái"
           >
-            <option value="">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="in_progress">In Progress</option>
-            <option value="queued">Queued</option>
-            <option value="waiting">Waiting</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="in_progress">Đang chạy</option>
+            <option value="queued">Đang chờ</option>
+            <option value="waiting">Đang đợi</option>
           </select>
           <select
             value={filters.conclusion}
             onChange={(e) => handleFilterChange('conclusion', e.target.value)}
             className="input w-full sm:w-40"
-            aria-label="Result"
+            aria-label="Kết quả"
           >
-            <option value="">All Results</option>
-            <option value="success">Success</option>
-            <option value="failure">Failure</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">Tất cả kết quả</option>
+            <option value="success">Thành công</option>
+            <option value="failure">Thất bại</option>
+            <option value="cancelled">Đã hủy</option>
           </select>
           <input
             type="text"
-            placeholder="Branch..."
+            placeholder="Nhánh..."
             value={filters.branch}
             onChange={(e) => handleFilterChange('branch', e.target.value)}
             className="input w-full sm:w-40"
-            aria-label="Branch"
+            aria-label="Nhánh"
           />
         </div>
       </div>
@@ -147,7 +147,7 @@ export function Runs() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                      aria-label="Open run on GitHub"
+                      aria-label="Mở run trên GitHub"
                     >
                       <ExternalLink className="h-4 w-4 text-gray-400" />
                     </a>
@@ -169,11 +169,11 @@ export function Runs() {
                 <thead>
                   <tr>
                     <th>Run</th>
-                    <th>Status</th>
-                    <th>Branch</th>
-                    <th className="hidden lg:table-cell">Event</th>
-                    <th className="hidden xl:table-cell">Duration</th>
-                    <th>Started</th>
+                    <th>Trạng thái</th>
+                    <th>Nhánh</th>
+                    <th className="hidden lg:table-cell">Sự kiện</th>
+                    <th className="hidden xl:table-cell">Thời lượng</th>
+                    <th>Bắt đầu</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -223,7 +223,7 @@ export function Runs() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-                          aria-label="Open run on GitHub"
+                          aria-label="Mở run trên GitHub"
                         >
                           <ExternalLink className="h-4 w-4 text-gray-400" />
                         </a>
@@ -238,7 +238,7 @@ export function Runs() {
           <div className="px-4 py-8 text-center">
             <Play className="mx-auto mb-3 h-12 w-12 text-gray-300 dark:text-gray-600" />
             <p className="text-gray-500 dark:text-gray-400">
-              {search.trim() && total > 0 ? 'No runs on this page match your search' : 'No runs found'}
+              {search.trim() && total > 0 ? 'Không có run nào trên trang này khớp tìm kiếm' : 'Không tìm thấy run nào'}
             </p>
           </div>
         )}
@@ -246,8 +246,8 @@ export function Runs() {
         {total > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {(currentPage - 1) * (pagination?.page_size ?? 50) + 1}–
-              {Math.min(currentPage * (pagination?.page_size ?? 50), total)} of {total} runs
+              Hiển thị {(currentPage - 1) * (pagination?.page_size ?? 50) + 1}–
+              {Math.min(currentPage * (pagination?.page_size ?? 50), total)} trong tổng số {total} runs
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -257,10 +257,10 @@ export function Runs() {
                 className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <ChevronLeft className="w-4 h-4" />
-                Previous
+                Trước
               </button>
               <span className="text-sm text-gray-500 dark:text-gray-400 px-2">
-                Page {currentPage} of {totalPages}
+                Trang {currentPage} / {totalPages}
               </span>
               <button
                 type="button"
@@ -268,7 +268,7 @@ export function Runs() {
                 disabled={currentPage >= totalPages}
                 className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               >
-                Next
+                Sau
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>

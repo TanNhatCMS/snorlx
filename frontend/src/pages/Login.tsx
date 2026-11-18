@@ -54,14 +54,14 @@ export function Login() {
             <GitBranch className="h-10 w-10" />
           </div>
           <h1 className="mb-2 text-2xl font-bold text-white sm:text-3xl">Snorlx</h1>
-          <p className="text-gray-400">CI/CD Dashboard for GitHub Actions</p>
+          <p className="text-gray-400">CI/CD Dashboard cho GitHub Actions</p>
         </div>
 
         <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 p-5 shadow-2xl shadow-primary-500/10 backdrop-blur-xl sm:p-8">
           <div className="mb-6">
-            <h2 className="mb-2 text-xl font-semibold text-white">Welcome back</h2>
+            <h2 className="mb-2 text-xl font-semibold text-white">Chào mừng trở lại</h2>
             <p className="text-sm text-gray-400">
-              Sign in with your GitHub account to access your CI/CD pipelines and metrics.
+              Đăng nhập bằng tài khoản GitHub để xem pipeline và số liệu CI/CD của bạn.
             </p>
           </div>
           
@@ -73,26 +73,26 @@ export function Login() {
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Signing in...
+                Đang đăng nhập...
               </>
             ) : (
               <>
                 <GitHubMark className="h-5 w-5" />
-                Sign in with GitHub
+                Đăng nhập với GitHub
               </>
             )}
           </button>
           
           <div className="mt-6 text-center text-sm text-gray-400">
-            <p>Requires a GitHub App installation</p>
+            <p>Yêu cầu cài đặt GitHub App</p>
             <p className="mt-2 text-xs text-gray-500">
-              Your organization admin must install the Snorlx GitHub App
+              Quản trị tổ chức của bạn phải cài đặt Snorlx GitHub App
             </p>
           </div>
         </div>
         
         <div className="mt-8 text-center text-xs text-gray-500">
-          <p>By signing in, you agree to our terms and conditions</p>
+          <p>Khi đăng nhập, bạn đồng ý với các điều khoản và điều kiện của chúng tôi</p>
         </div>
       </div>
     </div>

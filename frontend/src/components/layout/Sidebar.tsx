@@ -13,11 +13,11 @@ import { cn } from '../../lib/utils';
 import { useSidebar } from '../../context/SidebarContext';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Tổng quan', href: '/', icon: LayoutDashboard },
   { name: 'Workflows', href: '/workflows', icon: Workflow },
   { name: 'Runs', href: '/runs', icon: Play },
   { name: 'Repositories', href: '/repositories', icon: FolderGit2 },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Cài đặt', href: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -37,7 +37,7 @@ export function Sidebar() {
           {!isCollapsed && (
             <div>
               <h1 className="font-semibold text-gray-900 dark:text-slate-100">Snorlx</h1>
-              <p className="text-xs text-gray-500 dark:text-slate-400">CI/CD Dashboard</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Dashboard CI/CD</p>
             </div>
           )}
         </div>
@@ -74,14 +74,14 @@ export function Sidebar() {
               'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100 dark:border dark:border-secondary-500/20 dark:hover:border-secondary-500/50',
               isCollapsed && 'justify-center'
             )}
-            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCollapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'}
           >
             {isCollapsed ? (
               <ChevronRight className="w-5 h-5" />
             ) : (
               <>
                 <ChevronLeft className="w-5 h-5" />
-                <span>Collapse</span>
+                <span>Thu gọn</span>
               </>
             )}
           </button>

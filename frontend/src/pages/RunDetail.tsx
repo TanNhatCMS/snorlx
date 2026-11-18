@@ -480,7 +480,7 @@ function RunDetailInner() {
 		},
 		onError: (err: Error) => {
 			console.error("Re-run failed:", err);
-			setRerunError(err.message || "Failed to re-run workflow");
+			setRerunError(err.message || "Chạy lại workflow thất bại");
 		},
 	});
 
@@ -493,7 +493,7 @@ function RunDetailInner() {
 		},
 		onError: (err: Error) => {
 			console.error("Cancel run failed:", err);
-			setCancelError(err.message || "Failed to cancel run");
+			setCancelError(err.message || "Hủy run thất bại");
 		},
 	});
 
@@ -1509,7 +1509,7 @@ function RunDetailInner() {
 	if (!run) {
 		return (
 			<div className="text-center py-12">
-				<p className="text-gray-500 dark:text-gray-400">Run not found</p>
+				<p className="text-gray-500 dark:text-gray-400">Không tìm thấy run</p>
 			</div>
 		);
 	}
@@ -1559,7 +1559,7 @@ function RunDetailInner() {
 							type="button"
 							onClick={() => navigate(-1)}
 							className="shrink-0 rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-							aria-label="Go back"
+							aria-label="Quay lại"
 						>
 							<ArrowLeft className="h-5 w-5 text-gray-500" />
 						</button>
@@ -1590,7 +1590,7 @@ function RunDetailInner() {
 							onClick={handleRefresh}
 							disabled={isRefetching || refreshRunMutation.isPending}
 							className="btn-secondary flex items-center gap-2"
-							title="Check GitHub now (updates arrive automatically; use this if something looks stale)"
+							title="Kiểm tra GitHub ngay (cập nhật tự đến; dùng khi nghi dữ liệu cũ)"
 						>
 							<RotateCw
 								className={cn(
@@ -1598,7 +1598,7 @@ function RunDetailInner() {
 									(isRefetching || refreshRunMutation.isPending) && "animate-spin",
 								)}
 							/>
-							Refresh
+							Làm mới
 						</button>
 
 						{isRunning && (
@@ -1616,7 +1616,7 @@ function RunDetailInner() {
 								) : (
 									<StopCircle className="w-4 h-4" />
 								)}
-								Cancel
+								Hủy
 							</button>
 						)}
 						<button
@@ -1688,7 +1688,7 @@ function RunDetailInner() {
 							: "text-gray-500 dark:text-gray-400",
 					)}
 				>
-					Graph
+					Đồ thị
 				</button>
 				<button
 					type="button"
@@ -1778,11 +1778,11 @@ function RunDetailInner() {
 										? "bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200"
 										: "bg-white hover:bg-gray-100 border border-gray-300 text-gray-700",
 								)}
-								title="Auto-arrange nodes"
-								aria-label="Auto layout"
+								title="Tự sắp xếp các node"
+								aria-label="Tự động bố cục"
 							>
 								<LayoutGrid className="h-4 w-4" />
-								<span className="hidden sm:inline">Auto Layout</span>
+								<span className="hidden sm:inline">Tự động bố cục</span>
 							</button>
 						</>
 					) : run.conclusion === "failure" ? (
@@ -1818,7 +1818,7 @@ function RunDetailInner() {
 											isDark ? "text-white" : "text-gray-900",
 										)}
 									>
-										Workflow Failed
+										Workflow thất bại
 									</h3>
 									<p
 										className={cn(
@@ -1826,7 +1826,7 @@ function RunDetailInner() {
 											isDark ? "text-gray-400" : "text-gray-600",
 										)}
 									>
-										This workflow failed before any jobs could be executed
+										Workflow thất bại trước khi job nào được thực thi
 									</p>
 								</div>
 
@@ -1841,7 +1841,7 @@ function RunDetailInner() {
 										)}
 									>
 										<Loader2 className="w-5 h-5 animate-spin text-red-400" />
-										Loading error details...
+										Đang tải chi tiết lỗi...
 									</div>
 								) : annotations && annotations.length > 0 ? (
 									<div className="space-y-3 mb-6">
@@ -1851,7 +1851,7 @@ function RunDetailInner() {
 												isDark ? "text-gray-400" : "text-gray-500",
 											)}
 										>
-											Error Details
+											Chi tiết lỗi
 										</h4>
 										{annotations.map((annotation) => (
 											<div
@@ -1916,7 +1916,7 @@ function RunDetailInner() {
 												isDark ? "text-gray-400" : "text-gray-600",
 											)}
 										>
-											Error details not available via API
+											Chi tiết lỗi không xem được qua API
 										</p>
 										<p
 											className={cn(
@@ -1924,9 +1924,9 @@ function RunDetailInner() {
 												isDark ? "text-gray-500" : "text-gray-500",
 											)}
 										>
-											This usually happens with workflow syntax errors.
+											Thường xảy ra với lỗi cú pháp workflow.
 											<br />
-											Check GitHub for the full error message.
+											Xem thông báo lỗi đầy đủ trên GitHub.
 										</p>
 									</div>
 								)}
@@ -1940,7 +1940,7 @@ function RunDetailInner() {
 										className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white! hover:text-white! font-medium transition-all shadow-lg shadow-red-900/30 hover:shadow-red-900/50"
 									>
 										<ExternalLink className="w-4 h-4" />
-										View Details on GitHub
+										Xem chi tiết trên GitHub
 									</a>
 								</div>
 							</div>
@@ -1948,9 +1948,9 @@ function RunDetailInner() {
 					) : (
 						<div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
 							<Play className="w-16 h-16 mb-4 opacity-30" />
-							<p className="text-lg font-medium">No jobs found</p>
+							<p className="text-lg font-medium">Không có job nào</p>
 							<p className="text-sm">
-								Jobs will appear here once the workflow starts
+								Job sẽ xuất hiện ở đây khi workflow bắt đầu
 							</p>
 						</div>
 					)}
@@ -1967,12 +1967,12 @@ function RunDetailInner() {
 					<div className="shrink-0 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
 						<h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
 							<Clock className="w-3 h-3" />
-							Timeline
+							Dòng thời gian
 						</h2>
 						<div className="space-y-0.5 text-xs">
 							<div className="flex items-start justify-between gap-3">
 								<span className="shrink-0 text-gray-500 dark:text-gray-400">
-									Started
+									Bắt đầu
 								</span>
 								<span className="text-right font-medium text-gray-900 dark:text-gray-100">
 									{formatDateTime(run.started_at)}
@@ -1981,7 +1981,7 @@ function RunDetailInner() {
 							{run.completed_at && (
 								<div className="flex items-start justify-between gap-3">
 									<span className="shrink-0 text-gray-500 dark:text-gray-400">
-										Completed
+										Hoàn thành
 									</span>
 									<span className="text-right font-medium text-gray-900 dark:text-gray-100">
 										{formatDateTime(run.completed_at)}
@@ -2090,7 +2090,7 @@ function RunDetailInner() {
 																className="w-full btn-primary flex items-center justify-center gap-2 text-xs py-1.5"
 															>
 																<FileText className="w-3.5 h-3.5" />
-																View Logs
+																Xem log
 															</button>
 														</div>
 													</div>
@@ -2108,9 +2108,9 @@ function RunDetailInner() {
 										</div>
 										<div>
 											<p className="text-sm font-semibold text-white">
-												Workflow Failed
+												Workflow thất bại
 											</p>
-											<p className="text-xs text-gray-400">No jobs executed</p>
+											<p className="text-xs text-gray-400">Không có job nào được thực thi</p>
 										</div>
 									</div>
 
@@ -2118,7 +2118,7 @@ function RunDetailInner() {
 									{annotationsLoading ? (
 										<div className="flex items-center justify-center gap-2 text-gray-400 text-xs py-4 bg-slate-800/50 rounded-lg">
 											<Loader2 className="w-3 h-3 animate-spin text-red-400" />
-											Loading errors...
+											Đang tải lỗi...
 										</div>
 									) : annotations && annotations.length > 0 ? (
 										<div className="space-y-2 mb-4">
@@ -2139,14 +2139,14 @@ function RunDetailInner() {
 											))}
 											{annotations.length > 3 && (
 												<p className="text-xs text-gray-500 text-center">
-													+{annotations.length - 3} more errors
+													+{annotations.length - 3} lỗi khác
 												</p>
 											)}
 										</div>
 									) : (
 										<div className="text-center py-3 mb-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
 											<p className="text-xs text-gray-500">
-												Error details not available via API
+												Chi tiết lỗi không xem được qua API
 											</p>
 										</div>
 									)}
@@ -2158,13 +2158,13 @@ function RunDetailInner() {
 										className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white! hover:text-white! text-xs font-medium transition-colors"
 									>
 										<ExternalLink className="w-3 h-3" />
-										View on GitHub
+										Xem trên GitHub
 									</a>
 								</div>
 							) : (
 								<div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
 									<Clock className="w-8 h-8 mb-2 opacity-30" />
-									<p className="text-sm">No jobs found</p>
+									<p className="text-sm">Không có job nào</p>
 								</div>
 							)}
 						</div>
