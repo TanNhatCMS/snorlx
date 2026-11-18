@@ -1,27 +1,27 @@
 # Snorlx MCP
 
-Connect Cursor (or any MCP client) to a running Snorlx instance using a personal API token.
+Kết nối Cursor (hoặc bất kỳ MCP client nào) vào một instance Snorlx đang chạy bằng personal API token.
 
-## Prerequisites
+## Yêu cầu trước
 
-1. Snorlx backend running (default `http://localhost:8080`)
-2. Sign in to the dashboard and open **Settings → API tokens**
-3. Create a token. Prefer **read-only** unless you need the write tools (sync, rerun, cancel). Copy it once; it is not shown again.
+1. Backend Snorlx đang chạy (mặc định `http://localhost:8080`)
+2. Đăng nhập dashboard và mở **Settings → API tokens**
+3. Tạo token. Ưu tiên **read-only** trừ khi bạn cần các write tool (sync, rerun, cancel). Copy một lần duy nhất; sau đó không hiển thị lại.
 
-The MCP process acts as the user who minted the token: it sees exactly the repositories that user synced, nothing else.
+Tiến trình MCP hành động với danh tính người tạo token: nó chỉ thấy đúng các repository mà người đó đã sync, không hơn.
 
-## Install
+## Cài đặt
 
-From the repo root:
+Từ thư mục gốc repo:
 
 ```bash
 pnpm install
 pnpm mcp:build
 ```
 
-## Local Cursor (stdio)
+## Cursor cục bộ (stdio)
 
-Add to your Cursor MCP config (e.g. `~/.cursor/mcp.json`):
+Thêm vào cấu hình MCP của Cursor (ví dụ `~/.cursor/mcp.json`):
 
 ```json
 {
@@ -40,7 +40,7 @@ Add to your Cursor MCP config (e.g. `~/.cursor/mcp.json`):
 
 ## Product / remote (Streamable HTTP)
 
-HTTP mode requires a **separate** client credential (`MCP_HTTP_TOKEN`) and binds to localhost by default.
+Chế độ HTTP yêu cầu credential client **riêng** (`MCP_HTTP_TOKEN`) và mặc định bind vào localhost.
 
 ```bash
 SNORLX_API_URL=https://snorlx.example.com \
@@ -51,36 +51,36 @@ MCP_PORT=3100 \
 pnpm mcp:http
 ```
 
-| Variable | Purpose |
+| Biến | Mục đích |
 |----------|---------|
-| `SNORLX_API_TOKEN` | Personal API token used by the MCP process to call Snorlx |
-| `MCP_HTTP_TOKEN` | Required. Clients must send `Authorization: Bearer <MCP_HTTP_TOKEN>` on `/mcp` |
-| `MCP_HOST` | Bind address (default `127.0.0.1`). Set to `0.0.0.0` only behind an authenticated reverse proxy / mTLS |
-| `MCP_PORT` | Listen port (default `3100`) |
-| `MCP_ALLOWED_HOSTS` | Comma-separated `Host` header values accepted on `/mcp` (DNS rebinding protection). Defaults to the loopback names when `MCP_HOST` is loopback; set it when binding elsewhere |
-| `MCP_SESSION_TTL_SECONDS` | Idle MCP sessions are closed after this many seconds (default 1800) |
+| `SNORLX_API_TOKEN` | Personal API token mà tiến trình MCP dùng để gọi Snorlx |
+| `MCP_HTTP_TOKEN` | Bắt buộc. Client phải gửi `Authorization: Bearer <MCP_HTTP_TOKEN>` vào `/mcp` |
+| `MCP_HOST` | Địa chỉ bind (mặc định `127.0.0.1`). Chỉ đặt `0.0.0.0` khi đứng sau reverse proxy có xác thực / mTLS |
+| `MCP_PORT` | Port lắng nghe (mặc định `3100`) |
+| `MCP_ALLOWED_HOSTS` | Các giá trị header `Host` (phân tách phẩy) được chấp nhận trên `/mcp` (chống DNS rebinding). Mặc định là các tên loopback khi `MCP_HOST` là loopback; đặt khi bind chỗ khác |
+| `MCP_SESSION_TTL_SECONDS` | Session MCP nhàn rỗi bị đóng sau số giây này (mặc định 1800) |
 
-Without `MCP_HTTP_TOKEN`, anyone who can reach `/mcp` could drive all tools using the process Snorlx token. Treat `/mcp` as a private control plane: keep it on loopback, or terminate TLS and auth at a reverse proxy before opening it on a network. Request failures return a generic `500`; details are written to the MCP process log only.
+Không có `MCP_HTTP_TOKEN`, bất kỳ ai truy cập được `/mcp` đều có thể điều khiển mọi tool bằng token Snorlx của tiến trình. Hãy coi `/mcp` như mặt phẳng điều khiển riêng tư: giữ trên loopback, hoặc kết thúc TLS và xác thực ở reverse proxy trước khi mở ra mạng. Lỗi request trả về `500` chung chung; chi tiết chỉ ghi vào log của tiến trình MCP.
 
 ## Tools
 
-Read tools cover dashboard summary/trends, orgs, repos, scores, workflows, runs, jobs, annotations, active pipelines, and **log content**:
+Các read tool bao phủ dashboard summary/trends, tổ chức, repo, điểm số, workflows, runs, jobs, annotations, active pipelines, và **nội dung log**:
 
-- `get_job_logs` returns one job's log **content** — served from Snorlx's archive even after GitHub's 90-day retention deleted it, with the live GitHub log as fallback.
-- `get_run_logs` returns a run's log as one text block: the logs of its completed jobs joined with `### <name> (job <id>)` headers. Prefer `get_run_annotations` for quick failure hints; both truncate to `max_chars` (default 24k) for MCP context limits.
+- `get_job_logs` trả **nội dung** log của một job — lấy từ archive của Snorlx kể cả khi GitHub đã xoá sau 90 ngày retention, với phương án dự phòng là log live trên GitHub.
+- `get_run_logs` trả log của một run dạng một khối text: log các job đã hoàn thành nối với nhau bằng header `### <name> (job <id>)`. Ưu tiên `get_run_annotations` khi cần gợi ý lỗi nhanh; cả hai đều cắt theo `max_chars` (mặc định 24k) cho giới hạn ngữ cảnh của MCP.
 
-Write tools (require token `write` scope; confirm with the user before use):
+Các write tool (yêu cầu token scope `write`; xác nhận với người dùng trước khi dùng):
 
 - `sync_repositories` / `sync_repository`
 - `backfill_deployment_runs`
-- `backfill_repository_logs` — archive recent completed runs' job logs into Snorlx so they survive GitHub's retention window (rate-limit heavy; call again for the next slice)
+- `backfill_repository_logs` — archive log job của các run hoàn thành gần đây vào Snorlx để sống sót qua khoảng retention của GitHub (tốn nhiều rate limit; gọi lại để xử lý tiếp)
 - `update_workflow`
 - `rerun_workflow` / `cancel_run`
 
-## Security notes
+## Lưu ý bảo mật
 
-- Tokens are hashed at rest; plaintext is shown only once at creation.
-- Validated Bearer API tokens skip CSRF; cookie sessions still use Origin checks. A bogus `Authorization` header does not bypass CSRF.
-- Never put OAuth client secrets or GitHub tokens into MCP env vars; use a user-minted `snorlx_` API token only.
-- Stdio mode keeps secrets in the local Cursor process env; do not commit them.
-- Every HTTP client shares the identity of the token owner. Mint one token per agent or per person so revocation stays targeted.
+- Token được hash khi lưu; plaintext chỉ hiển thị đúng một lần lúc tạo.
+- Bearer API token hợp lệ bỏ qua CSRF; session cookie vẫn kiểm tra Origin. Header `Authorization` giả không vượt qua được CSRF.
+- Không bao giờ đặt OAuth client secret hay GitHub token vào biến môi trường của MCP; chỉ dùng API token `snorlx_` do người dùng tạo.
+- Chế độ stdio giữ secret trong env của tiến trình Cursor cục bộ; đừng commit chúng.
+- Mọi HTTP client dùng chung danh tính chủ token. Tạo một token cho mỗi agent hoặc mỗi người để thu hồi tập trung đúng chỗ.

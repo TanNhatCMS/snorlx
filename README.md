@@ -1,84 +1,89 @@
-# Snorlx - CI/CD Dashboard for GitHub Actions
+# Snorlx - CI/CD Dashboard cho GitHub Actions
+
+> **Fork tiếng Việt**: đây là fork [banshee86vr/snorlx](https://github.com/banshee86vr/snorlx) của
+> [TanNhatCMS](https://github.com/TanNhatCMS), thêm tính năng **lưu trữ log vĩnh viễn** và **MCP server
+> trả nội dung log cho agent**. Tài liệu và giao diện đã dịch sang tiếng Việt; comment trong source
+> giữ tiếng Anh để dễ đồng bộ với upstream.
 
 [![CI](https://github.com/banshee86vr/snorlx/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/banshee86vr/snorlx/actions/workflows/ci.yml) [![Security Scans](https://github.com/banshee86vr/snorlx/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/banshee86vr/snorlx/actions/workflows/security.yml) [![Release](https://github.com/banshee86vr/snorlx/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/banshee86vr/snorlx/actions/workflows/release.yml) [![Latest release](https://img.shields.io/github/v/release/banshee86vr/snorlx?sort=semver)](https://github.com/banshee86vr/snorlx/releases/latest) [![Go](https://img.shields.io/github/go-mod/go-version/banshee86vr/snorlx?filename=backend%2Fgo.mod)](backend/go.mod) [![License: MIT](https://img.shields.io/github/license/banshee86vr/snorlx)](LICENSE)
 
-A comprehensive, self-hosted dashboard that provides centralized visibility over GitHub Actions pipelines, performance metrics, and costs distributed across multiple repositories and organizations.
+Dashboard tự host toàn diện, cho bạn nhìn tập trung mọi pipeline GitHub Actions, số liệu hiệu năng và chi phí phân bố trên nhiều repository và tổ chức.
 
 ![Dashboard Preview](docs/preview.png)
 
-## Features
+## Tính năng
 
-- **Centralized Visibility**: Single pane of glass for all workflow runs across repositories
-- **Repository Scoring**: Grade repos with gold/silver/bronze tiers across Security, Testing, CI/CD, Documentation, Code Quality, Maintenance, and Community
-- **Real-time Updates**: Live pipeline status via WebSocket, fed by webhooks and a server-side poller that uses conditional GitHub requests
-- **GitHub OAuth**: Sign in with GitHub; no GitHub App setup required
-- **Cost Tracking**: Per-workflow and per-repository cost analysis
-- **Multi-repository Support**: Monitor workflows across multiple repos and organizations
-- **Beautiful UI**: Modern, responsive design with dark/light mode
-- **Two Storage Modes**: Quick start with memory storage or persistent PostgreSQL database
+- **Nhìn tập trung**: một màn hình duy nhất cho mọi workflow run trên tất cả repository
+- **Chấm điểm repository**: xếp hạng vàng/bạc/đồng theo 7 nhóm: Bảo mật, Kiểm thử, CI/CD, Tài liệu, Chất lượng code, Bảo trì và Cộng đồng
+- **Cập nhật realtime**: trạng thái pipeline trực tiếp qua WebSocket, được nuôi bằng webhook và live poller phía server dùng conditional request tới GitHub
+- **GitHub OAuth**: đăng nhập bằng GitHub, không cần cấu hình GitHub App
+- **Theo dõi chi phí**: phân tích chi phí theo từng workflow và từng repository
+- **Hỗ trợ nhiều repository**: theo dõi workflow trên nhiều repo và tổ chức
+- **Giao diện đẹp**: thiết kế hiện đại, responsive, có dark/light mode
+- **Hai chế độ lưu trữ**: chạy nhanh với memory hoặc bền vững với PostgreSQL
 
-## Architecture
+## Kiến trúc
 
 ![Architecture](docs/architecture.jpg)
 
-## Quick Start
+## Chạy nhanh
 
-### ⚡ TL;DR - Get Running in 5 Minutes
+### ⚡ TL;DR - Chạy được trong 5 phút
 
-**No Database (Memory Mode):**
+**Không database (chế độ memory):**
 
 ```bash
-# 1. Clone and install
+# 1. Clone và cài dependency
 git clone https://github.com/banshee86vr/snorlx.git && cd snorlx && pnpm install
 
-# 2. Configure (edit .env with your GitHub OAuth credentials and a SESSION_SECRET)
+# 2. Cấu hình (sửa .env với GitHub OAuth credentials và SESSION_SECRET)
 cp env.example .env
 
-# 3. Set STORAGE_MODE=memory in .env (default)
+# 3. Đặt STORAGE_MODE=memory trong .env (mặc định)
 
-# 4. Start both frontend and backend
+# 4. Khởi động cả frontend và backend
 pnpm run dev
 ```
 
-**With PostgreSQL Database:**
+**Với PostgreSQL:**
 
 ```bash
-# 1. Clone and install
+# 1. Clone và cài dependency
 git clone https://github.com/banshee86vr/snorlx.git && cd snorlx && pnpm install
 
-# 2. Start PostgreSQL (Docker)
+# 2. Chạy PostgreSQL (Docker)
 docker run --name snorlx-postgres \
   -e POSTGRES_DB=snorlx \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 -d timescale/timescaledb:latest-pg16
 
-# 3. Configure (edit .env with your credentials and DATABASE_URL)
+# 3. Cấu hình (sửa .env với credentials và DATABASE_URL)
 cp env.example .env
 
-# 4. Set STORAGE_MODE=database and DATABASE_URL in .env
+# 4. Đặt STORAGE_MODE=database và DATABASE_URL trong .env
 
-# 5. Start both frontend and backend
+# 5. Khởi động cả frontend và backend
 pnpm run dev
 ```
 
-Access at: http://localhost:5173
+Truy cập tại: http://localhost:5173
 
-### Prerequisites
+### Yêu cầu
 
 - Go 1.26+
 - Node.js 20+
-- pnpm or npm
-- PostgreSQL 14+ with TimescaleDB (optional - only for database mode)
-- GitHub OAuth App (see [Setup Guide](#github-oauth-app-setup))
+- pnpm hoặc npm
+- PostgreSQL 14+ với TimescaleDB (tùy chọn - chỉ cần cho chế độ database)
+- GitHub OAuth App (xem [Hướng dẫn cấu hình](#cấu-hình-github-oauth-app))
 
-## 🚀 Local Development (No Docker Required)
+## 🚀 Phát triển cục bộ (Không cần Docker)
 
-### Option 1: Memory Mode (No Database)
+### Cách 1: Chế độ Memory (Không cần database)
 
-**Perfect for testing and development!** Start in minutes without setting up a database.
+**Hoàn hảo để thử và phát triển!** Chạy trong vài phút, không cần dựng database.
 
-1. **Clone and install dependencies**
+1. **Clone và cài dependency**
 
 ```bash
 git clone https://github.com/banshee86vr/snorlx.git
@@ -86,60 +91,60 @@ cd snorlx
 pnpm install
 ```
 
-2. **Configure environment**
+2. **Cấu hình môi trường**
 
 ```bash
-# Copy example environment file
+# Copy file môi trường mẫu
 cp env.example .env
 ```
 
-Edit `.env` with your credentials:
+Sửa `.env` với credentials của bạn:
 
 ```env
-# Storage Mode - Use memory for quick start (no database needed)
+# Storage Mode - dùng memory để chạy nhanh (không cần database)
 STORAGE_MODE=memory
 
-# GitHub OAuth (create at: https://github.com/settings/developers)
+# GitHub OAuth (tạo tại: https://github.com/settings/developers)
 GITHUB_CLIENT_ID=your_oauth_client_id
 GITHUB_CLIENT_SECRET=your_oauth_client_secret
 
-# Encrypts stored GitHub tokens (generate with: openssl rand -base64 32, minimum 32 characters)
+# Khóa mã hóa GitHub token đã lưu (tạo bằng: openssl rand -base64 32, tối thiểu 32 ký tự)
 SESSION_SECRET=your_random_32_character_secret_string
 
-# URLs (the Vite dev server proxies /api and /ws to the backend)
+# URLs (Vite dev server sẽ proxy /api và /ws về backend)
 PORT=8080
 FRONTEND_URL=http://localhost:5173
 ```
 
-`DEV_MODE=true` only relaxes startup validation (placeholder secret, missing OAuth credentials); you still need real OAuth credentials to sign in.
+`DEV_MODE=true` chỉ nới lỏng kiểm tra lúc khởi động (secret placeholder, thiếu OAuth credentials); bạn vẫn cần OAuth credentials thật để đăng nhập.
 
-3. **Start the application**
+3. **Khởi động ứng dụng**
 
 ```bash
-# From project root - starts both frontend and backend concurrently
+# Từ thư mục gốc dự án - khởi động cả frontend và backend đồng thời
 pnpm run dev
 ```
 
-The application will start:
+Ứng dụng sẽ chạy:
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8080
 
-**Or start separately:**
+**Hoặc khởi động riêng:**
 
 ```bash
-# Backend only
+# Chỉ backend
 pnpm run dev:backend
 
-# Frontend only (in another terminal)
+# Chỉ frontend (terminal khác)
 pnpm run dev:frontend
 ```
 
-### Option 2: Database Mode (Persistent Storage)
+### Cách 2: Chế độ Database (Lưu trữ bền vững)
 
-For persistent data storage. In this mode the backend refuses to start when the database is unreachable instead of silently falling back to memory.
+Dành cho lưu trữ dữ liệu lâu dài. Ở chế độ này backend sẽ từ chối khởi động khi không kết nối được database thay vì âm thầm rơi về memory.
 
-#### Step 1: Install Dependencies
+#### Bước 1: Cài dependency
 
 ```bash
 git clone https://github.com/banshee86vr/snorlx.git
@@ -147,9 +152,9 @@ cd snorlx
 pnpm install
 ```
 
-#### Step 2: Setup PostgreSQL + TimescaleDB
+#### Bước 2: Dựng PostgreSQL + TimescaleDB
 
-**Using Docker (Recommended)**
+**Dùng Docker (khuyên dùng)**
 
 ```bash
 docker run --name snorlx-postgres \
@@ -160,37 +165,37 @@ docker run --name snorlx-postgres \
   -d timescale/timescaledb:latest-pg16
 ```
 
-**Using Local PostgreSQL (macOS with Homebrew)**
+**Dùng PostgreSQL cục bộ (macOS với Homebrew)**
 
 ```bash
-# Install TimescaleDB
+# Cài TimescaleDB
 brew install postgresql@16 timescaledb
 
-# Start PostgreSQL
+# Khởi động PostgreSQL
 brew services start postgresql@16
 
-# Create database
+# Tạo database
 psql postgres -c "CREATE DATABASE snorlx;"
 ```
 
-#### Step 3: Configure Environment
+#### Bước 3: Cấu hình môi trường
 
 ```bash
 cp env.example .env
 ```
 
-Edit `.env`:
+Sửa `.env`:
 
 ```env
-# Storage Mode - Use database for persistence
+# Storage Mode - dùng database để lưu trữ bền vững
 STORAGE_MODE=database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/snorlx?sslmode=disable
 
-# GitHub Configuration
+# Cấu hình GitHub
 GITHUB_CLIENT_ID=your_oauth_client_id
 GITHUB_CLIENT_SECRET=your_oauth_client_secret
 
-# Encrypts stored GitHub tokens (openssl rand -base64 32)
+# Khóa mã hóa GitHub token đã lưu (openssl rand -base64 32)
 SESSION_SECRET=your_random_32_character_secret_string
 
 # URLs
@@ -198,406 +203,406 @@ PORT=8080
 FRONTEND_URL=http://localhost:5173
 ```
 
-#### Step 4: Start the Application
+#### Bước 4: Khởi động ứng dụng
 
 ```bash
-# From project root - starts both frontend and backend concurrently
-# Migrations run automatically on backend startup
+# Từ thư mục gốc dự án - khởi động cả frontend và backend đồng thời
+# Migration tự chạy khi backend khởi động
 pnpm run dev
 ```
 
-Access the dashboard at http://localhost:5173
+Truy cập dashboard tại http://localhost:5173
 
-## 🐳 Docker Compose Setup
+## 🐳 Cài đặt bằng Docker Compose
 
-A production-like stack with all services containerized. The browser talks only to the frontend: nginx serves the SPA and proxies `/api` and `/ws` to the backend, so one origin, first-party cookies and a strict CSP.
+Stack giống production với mọi dịch vụ được container hóa. Browser chỉ nói chuyện với frontend: nginx phục vụ SPA và proxy `/api` cùng `/ws` về backend — một origin duy nhất, cookie first-party và CSP nghiêm ngặt.
 
-1. **Configure environment**
+1. **Cấu hình môi trường**
 
 ```bash
 cp env.example .env
-# Set POSTGRES_PASSWORD, SESSION_SECRET, GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET.
-# Register the OAuth callback as http://localhost:5174/api/auth/callback.
-# Optional: ALLOWED_GITHUB_USERS / ALLOWED_GITHUB_ORGS to restrict who can sign in.
+# Đặt POSTGRES_PASSWORD, SESSION_SECRET, GITHUB_CLIENT_ID và GITHUB_CLIENT_SECRET.
+# Đăng ký OAuth callback là http://localhost:5174/api/auth/callback.
+# Tùy chọn: ALLOWED_GITHUB_USERS / ALLOWED_GITHUB_ORGS để hạn chế ai được đăng nhập.
 ```
 
-2. **Start all services**
+2. **Khởi động mọi dịch vụ**
 
 ```bash
 docker compose up -d
 ```
 
-The dashboard is available at http://localhost:5174. The backend is not published on the host; it is reachable only through the frontend proxy, and the database listens on `127.0.0.1:5433` for local `psql` access.
+Dashboard có tại http://localhost:5174. Backend không public ra host; chỉ truy cập được qua proxy của frontend, và database lắng nghe trên `127.0.0.1:5433` để truy cập `psql` cục bộ.
 
-3. **View logs**
+3. **Xem log**
 
 ```bash
 docker compose logs -f
 ```
 
-4. **Stop services**
+4. **Dừng dịch vụ**
 
 ```bash
 docker compose down
 ```
 
-## Repository Scoring
+## Chấm điểm Repository
 
-Repositories are graded with an overall percentage and a tier (gold / silver / bronze) based on checks in seven categories:
+Repository được chấm điểm tổng theo phần trăm và hạng (vàng / bạc / đồng) dựa trên các kiểm tra trong 7 nhóm:
 
-| Category       | Weight | Examples |
-| -------------- | ------ | -------- |
-| Security       | 25%    | Branch protection, Dependabot, code scanning |
-| Testing        | 20%    | Test configs, coverage, CI test jobs |
-| CI/CD          | 15%    | Workflows, deployment, status checks |
-| Documentation | 15%    | README, CONTRIBUTING, issue templates |
-| Code Quality   | 10%    | Linters, code owners |
-| Maintenance    | 10%    | Recent activity, description |
-| Community      | 5%     | Community health files |
+| Nhóm           | Trọng số | Ví dụ                                        |
+| -------------- | -------- | -------------------------------------------- |
+| Bảo mật        | 25%      | Branch protection, Dependabot, code scanning |
+| Kiểm thử       | 20%      | Cấu hình test, coverage, job test trong CI   |
+| CI/CD          | 15%      | Workflows, deployment, status checks         |
+| Tài liệu       | 15%      | README, CONTRIBUTING, issue templates        |
+| Chất lượng code| 10%      | Linters, code owners                         |
+| Bảo trì        | 10%      | Hoạt động gần đây, mô tả                     |
+| Cộng đồng      | 5%       | Community health files                       |
 
-Sync a repository and use **Refresh grade** on its detail page to compute or update its score. The dashboard summary shows average score across repos.
+Sync một repository rồi dùng **Refresh grade** trên trang chi tiết của nó để tính hoặc cập nhật điểm. Tổng quan dashboard hiển thị điểm trung bình của các repo.
 
-## GitHub OAuth App Setup
+## Cấu hình GitHub OAuth App
 
-This project uses GitHub OAuth App for user authentication (simpler than GitHub Apps).
+Dự án dùng GitHub OAuth App để xác thực người dùng (đơn giản hơn GitHub Apps).
 
-### Step 1: Create OAuth App
+### Bước 1: Tạo OAuth App
 
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers). On GitHub Enterprise Server, open `https://<your-ghe-host>/settings/developers` on that instance instead.
-2. Click **OAuth Apps** → **New OAuth App**
-3. Fill in the details:
+1. Mở [GitHub Developer Settings](https://github.com/settings/developers). Với GitHub Enterprise Server, mở `https://<ghe-host>/settings/developers` trên instance đó.
+2. Nhấn **OAuth Apps** → **New OAuth App**
+3. Điền thông tin:
 
-   - **Application name**: `Snorlx Dashboard` (or your preferred name)
-   - **Homepage URL**: the value of `FRONTEND_URL` (`http://localhost:5173` in development)
-   - **Authorization callback URL**: `<FRONTEND_URL>/api/auth/callback` (`http://localhost:5173/api/auth/callback` in development; the frontend proxies `/api` to the backend). With a [`BASE_PATH`](#serving-under-a-sub-path) it is `<FRONTEND_URL><BASE_PATH>/api/auth/callback`
+   - **Application name**: `Snorlx Dashboard` (hoặc tên bạn thích)
+   - **Homepage URL**: giá trị của `FRONTEND_URL` (`http://localhost:5173` khi dev)
+   - **Authorization callback URL**: `<FRONTEND_URL>/api/auth/callback` (`http://localhost:5173/api/auth/callback` khi dev; frontend proxy `/api` về backend). Nếu dùng [`BASE_PATH`](#phục-vụ-dưới-sub-path) thì là `<FRONTEND_URL><BASE_PATH>/api/auth/callback`
 
-4. Click **Register application**
+4. Nhấn **Register application**
 
-### Step 2: Get Credentials
+### Bước 2: Lấy Credentials
 
-1. Copy the **Client ID**
-2. Click **Generate a new client secret** and copy it
+1. Copy **Client ID**
+2. Nhấn **Generate a new client secret** rồi copy
 
-### Step 3: Configure Environment
+### Bước 3: Cấu hình môi trường
 
-Add to your `.env` file:
+Thêm vào file `.env`:
 
 ```bash
 GITHUB_CLIENT_ID=your_client_id_here
 GITHUB_CLIENT_SECRET=your_client_secret_here
-# Only for GitHub Enterprise Server. Hostname, or the same host with /api/v3.
+# Chỉ dành cho GitHub Enterprise Server. Hostname, hoặc cùng host với /api/v3.
 # GITHUB_BASE_URL=https://github.mycompany.com
 ```
 
 ### OAuth Scopes
 
-The app requests these OAuth scopes:
+Ứng dụng xin các OAuth scopes sau:
 
-- `read:user` - Read user profile information
-- `user:email` - Access user email addresses
-- `repo` - Access repositories (for workflow data)
-- `read:org` - Read organization membership
+- `read:user` - Đọc thông tin profile người dùng
+- `user:email` - Truy cập địa chỉ email
+- `repo` - Truy cập repository (cho dữ liệu workflow)
+- `read:org` - Đọc tư cách thành viên tổ chức
 
-### Keeping runs up to date
+### Giữ runs luôn mới
 
-Runs update on their own while somebody has a page visible. The browser reports its visibility over the WebSocket, and the backend runs a live poller for users with a visible page: every `RUN_POLL_INTERVAL` (default `10s`) it re-reads each queued or in-progress run and its jobs, and every six intervals it lists the newest runs of every visible repository to pick up runs started since the last sync. Every request is conditional (`If-None-Match`), so a resource that did not change answers `304`, costs no GitHub rate-limit budget and writes nothing. Changes are pushed to the browser over the WebSocket; a page that becomes visible again triggers a pass right away and refetches what it missed. While the socket is down, pages poll the backend (never GitHub) until it reconnects, and those requests count as presence for 45 seconds (the same applies to API token clients such as MCP). Background tabs and closed browsers mean no GitHub traffic. The **Refresh** buttons stay as an escape hatch: they run the same conditional passes right away. See [ADR 0007](docs/adr/0007-server-side-live-run-polling.md).
+Runs tự cập nhật khi có người đang mở trang. Browser báo trạng thái hiển thị qua WebSocket, và backend chạy live poller cho những người có trang hiển thị: mỗi `RUN_POLL_INTERVAL` (mặc định `10s`) nó đọc lại từng run đang queued/in-progress cùng các job của run đó, và mỗi 6 chu kỳ liệt kê các run mới nhất của từng repository hiển thị để bắt các run bắt đầu từ lần sync trước. Mọi request đều conditional (`If-None-Match`) — tài nguyên không đổi trả `304`, không tốn rate-limit của GitHub và không ghi gì. Thay đổi được đẩy về browser qua WebSocket; trang vừa hiển thị lại sẽ kích hoạt một lượt quét ngay và lấy lại phần bỏ lỡ. Khi socket đứt, các trang poll backend (không bao giờ poll GitHub) tới khi kết nối lại; các request này được tính là presence trong 45 giây (áp dụng cả cho API token client như MCP). Tab nền và browser đóng nghĩa là không có traffic tới GitHub. Nút **Refresh** vẫn còn như lối thoát: chạy ngay các lượt quét conditional như bình thường. Xem [ADR 0007](docs/adr/0007-server-side-live-run-polling.md).
 
-### Optional: Webhooks
+### Tùy chọn: Webhooks
 
-Webhooks deliver changes the instant GitHub reports them and let the poller answer `304` for everything it checks. Configure one in your repository or organization settings:
+Webhook mang thay đổi đến ngay lúc GitHub báo, và cho phép poller trả `304` cho mọi thứ nó kiểm tra. Cấu hình trong phần cài đặt repository hoặc tổ chức:
 
-1. Go to Repository → Settings → Webhooks → Add webhook
+1. Vào Repository → Settings → Webhooks → Add webhook
 2. **Payload URL**: `https://your-domain.com/api/webhooks/github`
 3. **Content type**: `application/json`
-4. **Secret**: Generate a secure secret and add to `.env` as `GITHUB_WEBHOOK_SECRET`
-5. Select events: `Workflow runs`, `Workflow jobs`, `Deployments`
+4. **Secret**: tạo secret an toàn rồi thêm vào `.env` với tên `GITHUB_WEBHOOK_SECRET`
+5. Chọn events: `Workflow runs`, `Workflow jobs`, `Deployments`
 
-With webhooks on every repository you can lengthen `RUN_POLL_INTERVAL` or set it to `0` to rely on webhooks and manual refresh only.
+Khi webhook bật trên mọi repository, bạn có thể tăng `RUN_POLL_INTERVAL` hoặc đặt `0` để chỉ dựa vào webhook và refresh thủ công.
 
-## Log archive
+## Lưu trữ log (Log archive)
 
-Snorlx can keep job logs forever. When enabled, a completed job's log is downloaded once and
-stored gzip-compressed in the storage backend, so dashboard history survives GitHub's own
-90-day log retention — the log stays viewable even after GitHub deletes it.
+Snorlx có thể giữ log của job mãi mãi. Khi bật, log của mỗi job hoàn tất được tải về một lần và
+lưu nén gzip vào storage, nên lịch sử trên dashboard sống sót qua giới hạn giữ log 90 ngày của
+GitHub — log vẫn xem được cả khi GitHub đã xoá.
 
-- `LOG_ARCHIVE_ENABLED` (default `true`) turns the archiver on.
-- `LOG_ARCHIVE_MAX_SIZE_BYTES` (default 50 MB) caps one uncompressed job log; larger logs are
-  skipped so a runaway job cannot blow up storage.
+- `LOG_ARCHIVE_ENABLED` (mặc định `true`) bật/tắt archiver.
+- `LOG_ARCHIVE_MAX_SIZE_BYTES` (mặc định 50 MB) giới hạn một log job chưa nén; log lớn hơn bị
+  bỏ qua để một job chạy loạn không thể làm phình storage.
 
-`GET /api/jobs/{id}/logs` returns the local content URL when the log is archived (same
-`{url}` response shape as before), falling back to the GitHub signed URL otherwise. The
-archived content is served as plain text by `GET /api/jobs/{id}/logs/content`.
+`GET /api/jobs/{id}/logs` trả URL nội dung cục bộ khi log đã được archive (vẫn giữ nguyên dạng
+`{url}` như trước), ngược lại trả về signed URL của GitHub. Nội dung archive được phục vụ dạng
+plain text qua `GET /api/jobs/{id}/logs/content`.
 
-Runs completed before the feature was enabled can be backfilled while GitHub still has their
-logs (90 days at most):
+Các run hoàn tất trước khi bật tính năng có thể backfill trong lúc GitHub còn giữ log (tối đa
+90 ngày):
 
 ```bash
 curl -X POST -H "Authorization: Bearer <api-token>" http://localhost:8080/api/repositories/<id>/backfill-logs
 # {"archived":123,"failed":0,"scanned":45}
 ```
 
-The endpoint walks the repository's completed runs within GitHub's retention window, skips
-already archived jobs, and processes at most 500 runs per call — call it again for the next
-slice.
+Endpoint này đi qua các run hoàn tất của repository trong khoảng retention của GitHub, bỏ qua
+job đã archive, và xử lý tối đa 500 run mỗi lần gọi — gọi lại để xử lý tiếp.
 
-## Configuration
+## Cấu hình
 
-### Environment Variables
+### Biến môi trường
 
-#### Storage Configuration
+#### Lưu trữ (Storage)
 
-| Variable            | Required                | Default  | Description                                    |
-| ------------------- | ----------------------- | -------- | ---------------------------------------------- |
-| `STORAGE_MODE`      | No                      | `memory` | `memory` or `database`                         |
-| `DATABASE_URL`      | Only if `database` mode | -        | PostgreSQL connection string                   |
-| `POSTGRES_PASSWORD` | Only if `database` mode | -        | PostgreSQL password (used by Docker Compose)   |
+| Biến                | Bắt buộc                    | Mặc định | Mô tả                                          |
+| ------------------- | --------------------------- | -------- | ---------------------------------------------- |
+| `STORAGE_MODE`      | Không                       | `memory` | `memory` hoặc `database`                        |
+| `DATABASE_URL`      | Chỉ khi chế độ `database`   | -        | Chuỗi kết nối PostgreSQL                        |
+| `POSTGRES_PASSWORD` | Chỉ khi chế độ `database`   | -        | Mật khẩu PostgreSQL (Docker Compose dùng)       |
 
-#### Server Configuration
+#### Server
 
-| Variable              | Description                                                                                                           | Default                               |
+| Biến                  | Mô tả                                                                                                                 | Mặc định                              |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `PORT`                | Server port                                                                                                           | `8080`                                |
-| `LOG_LEVEL`           | Logging level (debug, info, warn, error)                                                                              | `info`                                |
-| `LOG_FORMAT`          | `json` for structured logs, anything else for console output                                                          | console                               |
-| `SESSION_SECRET`      | Derives the key that encrypts stored GitHub tokens. Required outside `DEV_MODE`, minimum 32 characters                | Required                              |
-| `FRONTEND_URL`        | Public origin (`scheme://host`) used for CORS, CSRF, WebSocket origin checks and the OAuth redirect. Plain `http` is accepted only for localhost outside `DEV_MODE` | `http://localhost:5173`               |
-| `BASE_PATH`           | URL path the dashboard is served under, such as `/snorlx`. Set it on the backend and the frontend container ([details](#serving-under-a-sub-path)) | empty (host root)                     |
-| `COOKIE_SECURE`       | Force the `Secure` flag on auth cookies                                                                               | `true` when `FRONTEND_URL` is https   |
-| `TRUSTED_PROXY_CIDRS` | Comma-separated networks whose `X-Forwarded-For` / `X-Real-IP` are trusted (ingress, reverse proxy)                   | none (peer address is used)           |
-| `VITE_API_URL`        | Backend API URL baked into the frontend build. Leave empty: the frontend proxies `/api` and `/ws` same-origin         | empty                                 |
+| `PORT`                | Port server                                                                                                           | `8080`                                |
+| `LOG_LEVEL`           | Mức log (debug, info, warn, error)                                                                                    | `info`                                |
+| `LOG_FORMAT`          | `json` cho log có cấu trúc, giá trị khác cho output console                                                            | console                               |
+| `SESSION_SECRET`      | Sinh khóa mã hóa GitHub token đã lưu. Bắt buộc ngoài `DEV_MODE`, tối thiểu 32 ký tự                                     | Bắt buộc                              |
+| `FRONTEND_URL`        | Origin công khai (`scheme://host`) dùng cho CORS, CSRF, kiểm tra origin WebSocket và redirect OAuth. `http` thường chỉ chấp nhận cho localhost ngoài `DEV_MODE` | `http://localhost:5173` |
+| `BASE_PATH`           | Đường dẫn dashboard được phục vụ, ví dụ `/snorlx`. Đặt ở cả backend và container frontend ([chi tiết](#phục-vụ-dưới-sub-path)) | trống (gốc host)               |
+| `COOKIE_SECURE`       | Ép cờ `Secure` lên cookie xác thực                                                                                    | `true` khi `FRONTEND_URL` là https    |
+| `TRUSTED_PROXY_CIDRS` | Các mạng (phân tách phẩy) mà `X-Forwarded-For` / `X-Real-IP` được tin (ingress, reverse proxy)                         | không (dùng địa chỉ peer)             |
+| `VITE_API_URL`        | URL backend API nhúng vào build frontend. Để trống: frontend proxy `/api` và `/ws` cùng origin                         | trống                                 |
 
-#### Serving under a sub-path
+#### Phục vụ dưới sub-path
 
-To serve the dashboard at `https://<host><base_path>` instead of `https://<host>`, set `BASE_PATH=<base_path>` on both the backend and the frontend container. No rebuild is needed. With the Helm chart, set `basePath: <base_path>`; it also prefixes the ingress paths.
+Để phục vụ dashboard tại `https://<host><base_path>` thay vì `https://<host>`, đặt `BASE_PATH=<base_path>` ở cả backend và container frontend. Không cần build lại. Với Helm chart, đặt `basePath: <base_path>`; nó cũng thêm tiền tố cho các ingress path.
 
-- `<base_path>` starts with `/` and has no trailing slash. Use letters, digits, `-` and `_`, with `/` between segments.
-- `FRONTEND_URL` stays the origin only (`https://<host>`).
-- Include the path when you register the OAuth callback (`<FRONTEND_URL><base_path>/api/auth/callback`) and the webhook URL (`<FRONTEND_URL><base_path>/api/webhooks/github`).
-- `pnpm run dev` reads `BASE_PATH` from the root `.env`; the app is then only reachable at `http://localhost:5173<base_path>`.
+- `<base_path>` bắt đầu bằng `/` và không có dấu `/` cuối. Dùng chữ, số, `-` và `_`, phân tách segment bằng `/`.
+- `FRONTEND_URL` vẫn chỉ là origin (`https://<host>`).
+- Đưa path vào khi đăng ký OAuth callback (`<FRONTEND_URL><base_path>/api/auth/callback`) và URL webhook (`<FRONTEND_URL><base_path>/api/webhooks/github`).
+- `pnpm run dev` đọc `BASE_PATH` từ `.env` gốc; ứng dụng khi đó chỉ truy cập được tại `http://localhost:5173<base_path>`.
 
-#### GitHub OAuth Configuration
+#### Cấu hình GitHub OAuth
 
-| Variable                | Description                                                                              | Required                    |
-| ----------------------- | ---------------------------------------------------------------------------------------- | --------------------------- |
-| `GITHUB_CLIENT_ID`      | GitHub OAuth App Client ID                                                               | Yes                         |
-| `GITHUB_CLIENT_SECRET`  | GitHub OAuth App Client Secret                                                           | Yes                         |
-| `GITHUB_BASE_URL`       | Enterprise Server URL (`https://host` or `.../api/v3`)                                   | No (defaults to github.com) |
-| `GITHUB_WEBHOOK_SECRET` | Webhook signature secret; unsigned deliveries are rejected                               | No (for webhooks only)      |
-| `ALLOWED_GITHUB_USERS`  | Comma-separated GitHub logins allowed to sign in                                         | No (recommended)            |
-| `ALLOWED_GITHUB_ORGS`   | Comma-separated GitHub organizations whose members may sign in                           | No (recommended)            |
-| `DEV_MODE`              | Relax startup validation (placeholder secret, missing OAuth credentials). Local dev only | No                          |
+| Biến                    | Mô tả                                                                                      | Bắt buộc                    |
+| ----------------------- | ------------------------------------------------------------------------------------------ | --------------------------- |
+| `GITHUB_CLIENT_ID`      | GitHub OAuth App Client ID                                                                 | Có                          |
+| `GITHUB_CLIENT_SECRET`  | GitHub OAuth App Client Secret                                                             | Có                          |
+| `GITHUB_BASE_URL`       | URL Enterprise Server (`https://host` hoặc `.../api/v3`)                                    | Không (mặc định github.com) |
+| `GITHUB_WEBHOOK_SECRET` | Secret xác thực chữ ký webhook; delivery không chữ ký bị từ chối                             | Không (chỉ cho webhook)     |
+| `ALLOWED_GITHUB_USERS`  | Danh sách GitHub login (phân tách phẩy) được phép đăng nhập                                  | Không (khuyên đặt)          |
+| `ALLOWED_GITHUB_ORGS`   | Các GitHub organization (phân tách phẩy) có thành viên được đăng nhập                        | Không (khuyên đặt)          |
+| `DEV_MODE`              | Nới lỏng kiểm tra khởi động (secret placeholder, thiếu OAuth credentials). Chỉ dùng dev cục bộ | Không                     |
 
-#### Sync Configuration
+#### Cấu hình Sync
 
-| Variable            | Required | Default     | Description                                                                                                   |
-| ------------------- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| `SYNC_LIMIT`        | No       | `0` (all)   | Limit number of repos to sync                                                                                 |
-| `SYNC_REPOS`        | No       | -           | Comma-separated list of specific repos to sync                                                                |
-| `RUN_POLL_INTERVAL` | No       | `10s`       | How often active runs are refreshed from GitHub for watching users (conditional requests). Minimum `5s`, `0` disables the poller |
+| Biến                | Bắt buộc | Mặc định    | Mô tả                                                                                                          |
+| ------------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| `SYNC_LIMIT`        | Không    | `0` (tất cả)| Giới hạn số repo được sync                                                                                     |
+| `SYNC_REPOS`        | Không    | -           | Danh sách repo cụ thể (phân tách phẩy) cần sync                                                                |
+| `RUN_POLL_INTERVAL` | Không    | `10s`       | Tần suất refresh các run đang chạy từ GitHub cho người đang xem (conditional request). Tối thiểu `5s`, `0` tắt poller |
 
 ## API Endpoints
 
 ### Health Check
 
-- `GET /health` - JSON `{"status":"ok","version":"<release>"}`. Liveness: process only.
-- `GET /health/ready` - `200 {"status":"ready"}` or `503 {"status":"unavailable"}`. Readiness: also pings the storage backend.
+- `GET /health` - JSON `{"status":"ok","version":"<release>"}`. Liveness: chỉ kiểm tra tiến trình.
+- `GET /health/ready` - `200 {"status":"ready"}` hoặc `503 {"status":"unavailable"}`. Readiness: ping luôn cả storage backend.
 
-All `/api` routes below (except `/api/auth/*` and the webhook receiver) require a session cookie or a personal API token, and every object is scoped to the repositories the caller synced. See [SECURITY.md](SECURITY.md) for the access model.
+Tất cả route `/api` bên dưới (trừ `/api/auth/*` và webhook receiver) yêu cầu session cookie hoặc personal API token, và mọi đối tượng đều giới hạn theo các repository mà caller đã sync. Xem [SECURITY.md](SECURITY.md) để hiểu mô hình truy cập.
 
-### Authentication
+### Xác thực
 
-- `GET /api/auth/login` - Initiate GitHub OAuth
+- `GET /api/auth/login` - Bắt đầu GitHub OAuth
 - `GET /api/auth/callback` - OAuth callback
-- `POST /api/auth/logout` - Logout
-- `GET /api/auth/status` - Check auth status
+- `POST /api/auth/logout` - Đăng xuất
+- `GET /api/auth/status` - Kiểm tra trạng thái đăng nhập
 
 ### Organizations
 
-- `GET /api/organizations` - List all organizations
-- `GET /api/organizations/:id` - Get organization details
+- `GET /api/organizations` - Liệt kê mọi tổ chức
+- `GET /api/organizations/:id` - Chi tiết một tổ chức
 
 ### Repositories
 
-- `GET /api/repositories` - List all repositories
-- `GET /api/repositories/:id` - Get repository details
-- `GET /api/repositories/scores` - List latest repository scores (all repos)
-- `GET /api/repositories/:id/score` - Get latest score for a repository
-- `POST /api/repositories/sync` - Trigger repository sync
+- `GET /api/repositories` - Liệt kê mọi repository
+- `GET /api/repositories/:id` - Chi tiết repository
+- `GET /api/repositories/scores` - Điểm mới nhất của các repository (tất cả)
+- `GET /api/repositories/:id/score` - Điểm mới nhất của một repository
+- `POST /api/repositories/sync` - Kích hoạt sync repository
 
 ### Workflows
 
-- `GET /api/workflows` - List all workflows
-- `GET /api/workflows/:id` - Get workflow details
-- `PATCH /api/workflows/:id` - Update workflow
-- `GET /api/workflows/:id/runs` - Get workflow runs
+- `GET /api/workflows` - Liệt kê mọi workflow
+- `GET /api/workflows/:id` - Chi tiết workflow
+- `PATCH /api/workflows/:id` - Cập nhật workflow
+- `GET /api/workflows/:id/runs` - Các run của workflow
 
 ### Runs
 
-- `GET /api/runs` - List all runs (with filters)
-- `GET /api/runs/:id` - Get run details
-- `GET /api/runs/:id/jobs` - Get run jobs
-- `GET /api/runs/:id/logs` - Get run logs
-- `GET /api/runs/:id/annotations` - Get run annotations
-- `GET /api/runs/:id/workflow-definition` - Get workflow YAML definition
-- `POST /api/runs/:id/rerun` - Rerun a workflow
-- `POST /api/runs/:id/cancel` - Cancel a running workflow
+- `GET /api/runs` - Liệt kê mọi run (có bộ lọc)
+- `GET /api/runs/:id` - Chi tiết run
+- `GET /api/runs/:id/jobs` - Các job của run
+- `GET /api/runs/:id/logs` - Log của run
+- `GET /api/runs/:id/annotations` - Annotations của run
+- `GET /api/runs/:id/workflow-definition` - Định nghĩa YAML của workflow
+- `POST /api/runs/:id/rerun` - Chạy lại workflow
+- `POST /api/runs/:id/cancel` - Hủy workflow đang chạy
 
 ### Jobs
 
-- `GET /api/jobs/:id/logs` - Get job logs
+- `GET /api/jobs/:id/logs` - Log của job
+- `GET /api/jobs/:id/logs/content` - Nội dung log đã archive (plain text)
 
 ### Dashboard
 
-- `GET /api/dashboard/summary` - Get dashboard summary
-- `GET /api/dashboard/trends` - Get trend data
+- `GET /api/dashboard/summary` - Tổng quan dashboard
+- `GET /api/dashboard/trends` - Dữ liệu xu hướng
 
 ### Real-time
 
-- `GET /ws` - WebSocket endpoint for real-time updates. Server events: `workflow_run` (a stored run changed or appeared), `workflow_job` (`{run_id, run_github_id}`: the jobs of that run changed), `deployment`, `sync:*`. The client sends `presence` (`{"active": bool}`) with its page visibility; the live poller works only for users with a visible page
+- `GET /ws` - Endpoint WebSocket cho cập nhật realtime. Server events: `workflow_run` (một run đã lưu đổi hoặc xuất hiện), `workflow_job` (`{run_id, run_github_id}`: các job của run đó thay đổi), `deployment`, `sync:*`. Client gửi `presence` (`{"active": bool}`) kèm trạng thái hiển thị trang; live poller chỉ chạy cho người dùng có trang hiển thị
 
 ### Webhooks
 
-- `POST /api/webhooks/github` - GitHub webhook receiver
+- `POST /api/webhooks/github` - Webhook receiver của GitHub
 
-## Project Structure
+## Cấu trúc dự án
 
 ```
-├── .github/workflows/      # CI and Security GitHub Actions
-├── frontend/               # React frontend
-│   ├── nginx/              # nginx template (SPA + same-origin /api and /ws proxy)
+├── .github/workflows/      # CI và Security GitHub Actions
+├── frontend/               # Frontend React
+│   ├── nginx/              # nginx template (SPA + proxy cùng origin cho /api và /ws)
 │   ├── src/
 │   │   ├── components/     # UI components (layout, protected routes)
 │   │   ├── context/        # React contexts (auth, theme, socket, sync, sidebar)
-│   │   ├── lib/            # Utility functions
-│   │   ├── pages/          # Page components
+│   │   ├── lib/            # Hàm tiện ích
+│   │   ├── pages/          # Các trang
 │   │   ├── services/       # API client
-│   │   ├── styles/         # Global styles
-│   │   ├── test/           # Test setup
-│   │   └── types/          # TypeScript types
+│   │   ├── styles/         # Styles toàn cục
+│   │   ├── test/           # Setup test
+│   │   └── types/          # Kiểu TypeScript
 │   └── ...
-├── backend/                # Go backend
-│   ├── cmd/server/         # Main entry point
+├── backend/                # Backend Go
+│   ├── cmd/server/         # Điểm khởi động chính
 │   ├── internal/
-│   │   ├── config/         # Configuration and validation
+│   │   ├── config/         # Cấu hình và validation
 │   │   ├── github/         # GitHub client
-│   │   ├── handlers/       # HTTP handlers (authn, per-user authz)
+│   │   ├── handlers/       # HTTP handlers (authn, authz theo user)
 │   │   ├── httpmiddleware/ # Trusted-proxy client IP, request logging
 │   │   ├── models/         # Data models
-│   │   ├── scorer/         # Repository scoring (gold/silver/bronze)
-│   │   ├── storage/        # Storage layer (memory/database) and migrations
-│   │   ├── tokencrypt/     # Encryption of stored GitHub tokens
-│   │   └── websocket/      # WebSocket hub for per-user real-time updates
+│   │   ├── scorer/         # Chấm điểm repository (vàng/bạc/đồng)
+│   │   ├── storage/        # Lớp lưu trữ (memory/database) và migrations
+│   │   ├── tokencrypt/     # Mã hóa GitHub token đã lưu
+│   │   └── websocket/      # WebSocket hub cho cập nhật realtime theo user
 │   └── ...
-├── docs/adr/               # Architecture decision records
+├── docs/adr/               # Ghi chú quyết định kiến trúc
 ├── helm/                   # Kubernetes Helm charts
-└── docker-compose.yml      # Docker configuration
+└── docker-compose.yml      # Cấu hình Docker
 ```
 
-## Troubleshooting
+## Xử lý sự cố
 
-### Common Issues
+### Lỗi thường gặp
 
-**Backend won't start: GitHub OAuth credentials required**
+**Backend không khởi động: thiếu GitHub OAuth credentials**
 
-- Provide `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` from a [GitHub OAuth App](#github-oauth-app-setup)
-- `DEV_MODE=true` lets the process start without them for local work on non-auth code, but nobody can sign in
+- Cung cấp `GITHUB_CLIENT_ID` và `GITHUB_CLIENT_SECRET` từ [GitHub OAuth App](#cấu-hình-github-oauth-app)
+- `DEV_MODE=true` cho phép tiến trình khởi động thiếu chúng để làm việc cục bộ với code không liên quan auth, nhưng không ai đăng nhập được
 
-**Backend won't start: SESSION_SECRET or FRONTEND_URL rejected**
+**Backend không khởi động: SESSION_SECRET hoặc FRONTEND_URL bị từ chối**
 
-- `SESSION_SECRET` must be a random value of at least 32 characters (`openssl rand -base64 32`)
-- `FRONTEND_URL` must be an origin such as `https://dash.example.com`; plain `http` is accepted only for localhost unless `DEV_MODE=true`
+- `SESSION_SECRET` phải là giá trị ngẫu nhiên ít nhất 32 ký tự (`openssl rand -base64 32`)
+- `FRONTEND_URL` phải là origin dạng `https://dash.example.com`; `http` thường chỉ chấp nhận cho localhost trừ khi `DEV_MODE=true`
 
-**Database connection errors**
+**Lỗi kết nối database**
 
-- Verify PostgreSQL is running: `psql -U postgres -d snorlx`
-- Check `DATABASE_URL` in `.env` matches your database credentials
-- Ensure TimescaleDB extension is installed
-- In database mode the backend exits on a connection failure by design; `/health/ready` returns 503 when the database goes away later
+- Kiểm tra PostgreSQL đang chạy: `psql -U postgres -d snorlx`
+- Kiểm tra `DATABASE_URL` trong `.env` khớp credentials database
+- Đảm bảo extension TimescaleDB đã cài
+- Ở chế độ database, backend thoát nếu mất kết nối — cố ý vậy; `/health/ready` trả 503 khi database mất
 
-**Signed in but the dashboard is empty**
+**Đăng nhập xong nhưng dashboard trống**
 
-- Each user sees only the repositories they synced with their own token. Click **Sync** once after signing in (and once after upgrading from a release before 1.1)
+- Mỗi người dùng chỉ thấy các repository họ tự sync bằng token của mình. Nhấn **Sync** một lần sau khi đăng nhập (và một lần sau khi nâng cấp từ release trước 1.1)
 
-**403 on every action or WebSocket disconnected**
+**403 trên mọi thao tác hoặc WebSocket đứt kết nối**
 
-- The browser origin must equal `FRONTEND_URL`. Serve the SPA and the API from that origin (the frontend image proxies `/api` and `/ws`); do not point the browser at the backend port directly
+- Origin của browser phải bằng `FRONTEND_URL`. Phục vụ SPA và API từ cùng origin đó (image frontend proxy `/api` và `/ws`); đừng trỏ browser thẳng vào port backend
 
-**Port already in use (EADDRINUSE)**
+**Port đã bị chiếm (EADDRINUSE)**
 
-- Backend (8080) or Frontend (5173) port is already taken
-- Find process: `lsof -i :8080` or `lsof -i :5173`
-- Kill process: `kill -9 <PID>`
-- Or change port in `.env`
+- Port Backend (8080) hoặc Frontend (5173) đã có tiến trình khác chiếm
+- Tìm tiến trình: `lsof -i :8080` hoặc `lsof -i :5173`
+- Tắt tiến trình: `kill -9 <PID>`
+- Hoặc đổi port trong `.env`
 
-**Memory mode data is lost**
+**Chế độ memory mất dữ liệu**
 
-- This is expected! Memory mode doesn't persist data between restarts
-- Use `STORAGE_MODE=database` for persistent storage
+- Đúng như dự kiến! Chế độ memory không giữ dữ liệu qua các lần khởi động lại
+- Dùng `STORAGE_MODE=database` để lưu trữ bền vững
 
-**"Too many requests" error**
+**Lỗi "Too many requests"**
 
-- Rate limiting is active. Wait and retry
-- In production, this prevents abuse
+- Rate limiting đang bật. Chờ rồi thử lại
+- Ở production, cơ chế này chống lạm dụng
 
 ## CI/CD
 
-The project includes three GitHub Actions workflows:
+Dự án gồm ba GitHub Actions workflows:
 
 ### CI (`ci.yml`)
 
-Runs on push and pull requests to `main`:
+Chạy trên push và pull request tới `main`:
 
-- **Backend**: Go vet, tests with race detector and coverage, binary build
-- **Frontend**: Lint, tests with coverage, production build
-- **Helm**: `helm lint` and `helm template`, including the chart `appVersion` image tag fallback
+- **Backend**: Go vet, test với race detector và coverage, build binary
+- **Frontend**: Lint, test với coverage, build production
+- **Helm**: `helm lint` và `helm template`, bao gồm fallback image tag từ `appVersion` của chart
 
 ### Release (`release.yml`)
 
-Runs on push to `main`. release-please opens or updates the release pull request, and publishes the release when that pull request merges. On publish it verifies the immutable release, builds the backend and frontend images, and pushes the Helm chart. See [Releases](#releases).
+Chạy trên push tới `main`. release-please mở hoặc cập nhật release pull request và publish release khi PR đó merge. Khi publish nó xác minh release bất biến, build image backend và frontend, và đẩy Helm chart. Xem [Releases](#releases).
 
 ### Security (`security.yml`)
 
-Runs on push, pull requests to `main`, and weekly (Monday 08:00 UTC):
+Chạy trên push, pull request tới `main`, và hàng tuần (thứ Hai 08:00 UTC):
 
-- **CodeQL Analysis**: Static analysis for Go and JavaScript/TypeScript
-- **Trivy Scans**: Filesystem vulnerability scan plus Docker image scans for both backend and frontend; fixable CRITICAL and HIGH findings fail the job
-- **Dependency Review**: Flags newly introduced vulnerable dependencies on PRs
-- **Go Security**: govulncheck and gosec (pinned versions) for Go-specific vulnerabilities
-- **npm Audit**: Checks for known vulnerabilities in Node packages
+- **CodeQL Analysis**: phân tích tĩnh cho Go và JavaScript/TypeScript
+- **Trivy Scans**: quét lỗ hổng filesystem cùng quét Docker image cho backend và frontend; các phát hiện CRITICAL và HIGH fixable sẽ làm job fail
+- **Dependency Review**: gắn cờ dependency mới có lỗ hổng trên PR
+- **Go Security**: govulncheck và gosec (pin version) cho lỗ hổng riêng của Go
+- **npm Audit**: kiểm tra lỗ hổng trong các package Node
 
-All workflows pin actions to full commit SHAs and install dependencies with `--frozen-lockfile`; Dependabot keeps the pins, the image digests and the lockfile current. See [ADR 0006](docs/adr/0006-supply-chain-pinning-and-signing.md).
+Mọi workflow pin actions tới full commit SHA và cài dependency với `--frozen-lockfile`; Dependabot giữ các pin, image digest và lockfile luôn mới. Xem [ADR 0006](docs/adr/0006-supply-chain-pinning-and-signing.md).
 
-## 12-Factor App Compliance
+## Tuân thủ 12-Factor App
 
-This application follows the [12-Factor methodology](https://12factor.net/):
+Ứng dụng tuân theo [phương pháp 12-Factor](https://12factor.net/):
 
-1. **Codebase**: Single repo tracked in Git
-2. **Dependencies**: Explicitly declared in `go.mod` and `package.json`
-3. **Config**: Environment variables for all configuration
-4. **Backing services**: Database as attached resource via URL
-5. **Build, release, run**: Docker images tagged with the product version
-6. **Processes**: Stateless; sessions in storage
-7. **Port binding**: Self-contained HTTP server
-8. **Concurrency**: Horizontal scaling via replicas
-9. **Disposability**: Graceful shutdown on SIGTERM
-10. **Dev/prod parity**: Docker Compose mirrors production
-11. **Logs**: JSON to stdout, collected by platform
-12. **Admin processes**: Migrations as part of startup
+1. **Codebase**: một repo duy nhất, theo dõi bằng Git
+2. **Dependencies**: khai báo tường minh trong `go.mod` và `package.json`
+3. **Config**: mọi cấu hình qua biến môi trường
+4. **Backing services**: database là tài nguyên gắn kèm qua URL
+5. **Build, release, run**: Docker image tag theo phiên bản sản phẩm
+6. **Processes**: stateless; session nằm trong storage
+7. **Port binding**: HTTP server tự chứa
+8. **Concurrency**: scale ngang qua replicas
+9. **Disposability**: tắt sạch sẽ khi nhận SIGTERM
+10. **Dev/prod parity**: Docker Compose đối chiếu production
+11. **Logs**: JSON ra stdout, thu thập bởi nền tảng
+12. **Admin processes**: migration chạy cùng lúc khởi động
 
 ## Releases
 
-Releases are cut by [release-please](https://github.com/googleapis/release-please) from Conventional Commits on `main`. It opens a release pull request that bumps the product version in the root, frontend, and MCP `package.json` files, `backend/internal/version/version.go`, `mcp/src/server.ts`, and `helm/snorlx/Chart.yaml`, and writes `CHANGELOG.md`. Merging that pull request publishes tag `vX.Y.Z` and one GitHub Release.
+Release được cắt bằng [release-please](https://github.com/googleapis/release-please) từ Conventional Commits trên `main`. Nó mở release pull request bump phiên bản sản phẩm trong các file `package.json` của gốc, frontend và MCP, `backend/internal/version/version.go`, `mcp/src/server.ts` và `helm/snorlx/Chart.yaml`, đồng thời ghi `CHANGELOG.md`. Merge PR đó sẽ publish tag `vX.Y.Z` và một GitHub Release.
 
-The repository uses GitHub immutable releases. After publication the tag cannot be moved, deleted, or reused, and GitHub attaches a release attestation. Check it with `gh release verify vX.Y.Z`. A failed verify, image, or chart job can be re-run from Actions. A new run publishes the `vX.Y.Z` tag already on that commit, or the tag you pass to workflow_dispatch. A wrong release needs a new patch version.
+Repository dùng GitHub immutable releases. Sau khi publish, tag không thể di chuyển, xoá hay dùng lại, và GitHub gắn release attestation. Kiểm tra bằng `gh release verify vX.Y.Z`. Job verify, image hoặc chart fail có thể chạy lại từ Actions. Một lần chạy mới sẽ publish tag `vX.Y.Z` đã có trên commit đó, hoặc tag bạn truyền vào workflow_dispatch. Release sai cần một patch version mới.
 
-Images are published only for that version, for `linux/amd64` and `linux/arm64`:
+Image chỉ publish theo phiên bản, cho `linux/amd64` và `linux/arm64`:
 
 ```bash
 docker pull ghcr.io/banshee86vr/snorlx-backend:X.Y.Z
 docker pull ghcr.io/banshee86vr/snorlx-frontend:X.Y.Z
 ```
 
-The Helm chart is an OCI artifact. An empty image tag in the chart uses `appVersion`, which matches the image tag. The chart needs the public dashboard origin: enable the ingress with TLS (the origin becomes `https://<first host>`) or set `backend.frontendUrl` explicitly, for example when TLS terminates in front of the ingress or for port-forward access. Generated secrets (database password, `SESSION_SECRET`) are created on first install and kept across upgrades.
+Helm chart là OCI artifact. Tag image trống trong chart dùng `appVersion`, khớp với image tag. Chart cần origin công khai của dashboard: bật ingress với TLS (origin thành `https://<first host>`) hoặc đặt `backend.frontendUrl` tường minh, ví dụ khi TLS kết thúc trước ingress hoặc để truy cập port-forward. Các secret được sinh (mật khẩu database, `SESSION_SECRET`) tạo lúc cài đầu tiên và giữ qua các lần nâng cấp.
 
 ```bash
 helm install snorlx oci://ghcr.io/banshee86vr/charts/snorlx --version X.Y.Z \
@@ -609,7 +614,7 @@ helm install snorlx oci://ghcr.io/banshee86vr/charts/snorlx --version X.Y.Z \
   --set github.allowedOrgs=my-org
 ```
 
-Images and the chart are signed with keyless cosign and carry SLSA provenance and an SBOM:
+Image và chart được ký bằng keyless cosign và mang SLSA provenance cùng SBOM:
 
 ```bash
 cosign verify \
@@ -618,14 +623,14 @@ cosign verify \
   ghcr.io/banshee86vr/snorlx-backend:X.Y.Z
 ```
 
-release-please authenticates with a GitHub App. Create the app (Contents, Pull requests, and Issues write), install it on this repository, and store `RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_APP_PRIVATE_KEY` as secrets. Enable immutable releases under Settings, General, Releases before the first release.
+release-please xác thực bằng GitHub App. Tạo app (Contents, Pull requests và Issues write), cài lên repository này, và lưu `RELEASE_PLEASE_APP_ID` cùng `RELEASE_PLEASE_APP_PRIVATE_KEY` vào secrets. Bật immutable releases trong Settings, General, Releases trước release đầu tiên.
 
-Any Conventional Commit, including `chore(deps)`, opens or updates a patch release pull request. Merge it when you want to ship.
+Mọi Conventional Commit, kể cả `chore(deps)`, đều mở hoặc cập nhật patch release pull request. Merge khi bạn muốn ship.
 
 ## MCP
 
-Snorlx exposes a Model Context Protocol server for agents (Cursor, etc.). Create a personal API token under **Settings → API tokens**, then see [docs/mcp.md](docs/mcp.md) for stdio and Streamable HTTP setup.
+Snorlx cung cấp Model Context Protocol server cho các agent (Cursor, v.v.). Tạo personal API token trong **Settings → API tokens**, rồi xem [docs/mcp.md](docs/mcp.md) để cấu hình stdio và Streamable HTTP.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License - xem [LICENSE](LICENSE).
