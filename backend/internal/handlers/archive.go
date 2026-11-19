@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -68,7 +67,12 @@ func (h *Handler) downloadLog(ctx context.Context, url string, maxSize int) ([]b
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("log download returned status %d", resp.StatusCode)
+		// Bọc status để caller (backfill) nhận ra 403/429 rate limit và dừng cả pass,
+		// giống hệt lỗi 403/429 ở bước lấy URL log.
+		return nil, &github.StatusCodeError{
+			StatusCode: resp.StatusCode,
+			Err:        fmt.Errorf("log download returned status %d", resp.StatusCode),
+		}
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, int64(maxSize)+1))
 	if err != nil {
@@ -199,10 +203,10 @@ const (
 	backfillPageSize = 50
 )
 
-// backfillMaxLogFetches caps the log-fetch attempts one backfill call spends, so a first
-// backfill cannot exhaust the calling user's hourly GitHub core quota (which also feeds the
-// live poller). A var so tests can tighten it.
-var backfillMaxLogFetches = 500
+// defaultBackfillMaxLogFetches caps the log-fetch attempts one backfill call spends, so a
+// first backfill cannot exhaust the calling user's hourly GitHub core quota (which also
+// feeds the live poller). Tests override it through the Handler field.
+const defaultBackfillMaxLogFetches = 500
 
 // GetJobLogContent serves an archived job log as plain text. Auth and access checks mirror
 // GetJobLogs so archived and live logs are exposed identically.
@@ -266,6 +270,10 @@ func (h *Handler) BackfillRepositoryLogs(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	maxFetches := h.backfillMaxLogFetches
+	if maxFetches <= 0 {
+		maxFetches = defaultBackfillMaxLogFetches
+	}
 	archived, failed, scanned, fetches := 0, 0, 0, 0
 	var rateLimited bool
 	filters := &models.RunFilters{RepoID: id, StartDate: time.Now().AddDate(0, 0, -backfillRetentionDays)}
@@ -293,7 +301,7 @@ backfill:
 				continue
 			}
 			for _, job := range jobs {
-				if fetches >= backfillMaxLogFetches {
+				if fetches >= maxFetches {
 					break backfill
 				}
 				fetches++
@@ -302,12 +310,9 @@ backfill:
 					// A rate-limit response means every further attempt would fail too and
 					// starve the live poller's token; stop the whole pass. Log-fetch errors are
 					// plain wrapper errors, so the status comes via StatusCodeError.
-					var rlErr *gh.RateLimitError
-					var abuseErr *gh.AbuseRateLimitError
-					var scErr *github.StatusCodeError
-					if errors.As(err, &rlErr) || errors.As(err, &abuseErr) ||
-						(errors.As(err, &scErr) && (scErr.StatusCode == http.StatusForbidden || scErr.StatusCode == http.StatusTooManyRequests)) {
+					if github.IsRateLimit(err) {
 						rateLimited = true
+						failed++
 						log.Warn().Int64("job_github_id", job.GitHubID).
 							Msg("Log archive: backfill stopped, GitHub rate limit reached")
 						break backfill
@@ -331,9 +336,10 @@ backfill:
 	}
 	log.Info().Int("repo_id", id).Int("archived", archived).Int("failed", failed).
 		Int("scanned", scanned).Bool("rate_limited", rateLimited).Msg("Log archive: backfill pass finished")
-	_ = json.NewEncoder(w).Encode(map[string]int{
-		"archived": archived,
-		"failed":   failed,
-		"scanned":  scanned,
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"archived":     archived,
+		"failed":       failed,
+		"scanned":      scanned,
+		"rate_limited": rateLimited,
 	})
 }

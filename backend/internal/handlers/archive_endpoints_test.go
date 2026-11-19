@@ -186,10 +186,6 @@ func TestBackfillRepositoryLogs_CapsLogFetches(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewClient failed: %v", err)
 	}
-	oldCap := backfillMaxLogFetches
-	backfillMaxLogFetches = 2
-	defer func() { backfillMaxLogFetches = oldCap }()
-
 	archived := make(map[int]bool)
 	store := &mockStorage{
 		getRepositoryFunc: func(ctx context.Context, id int) (*models.Repository, error) {
@@ -210,6 +206,7 @@ func TestBackfillRepositoryLogs_CapsLogFetches(t *testing.T) {
 		saveJobLogFunc: func(ctx context.Context, entry *models.JobLog) error { archived[entry.JobID] = true; return nil },
 	}
 	h := newTestHandler(store)
+	h.backfillMaxLogFetches = 2
 	h.ghClient = ghClient
 	h.config.LogArchiveMaxSizeBytes = 1 << 20
 

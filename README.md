@@ -338,11 +338,13 @@ Các run hoàn tất trước khi bật tính năng có thể backfill trong lú
 
 ```bash
 curl -X POST -H "Authorization: Bearer <api-token>" http://localhost:8080/api/repositories/<id>/backfill-logs
-# {"archived":123,"failed":0,"scanned":45}
+# {"archived":123,"failed":0,"scanned":45,"rate_limited":false}
 ```
 
 Endpoint này đi qua các run hoàn tất của repository trong khoảng retention của GitHub, bỏ qua
-job đã archive, và xử lý tối đa 500 run mỗi lần gọi — gọi lại để xử lý tiếp.
+job đã archive, và xử lý tối đa 500 run mỗi lần gọi — gọi lại để xử lý tiếp. Khi GitHub trả
+403/429 rate limit, pass dừng ngay và  báo cho caller biết nên chờ trước
+khi gọi tiếp.
 
 ## Cấu hình
 

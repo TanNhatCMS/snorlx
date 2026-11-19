@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"errors"
-	"sort"
 
 	"snorlx/backend/internal/models"
 )
@@ -48,34 +47,4 @@ func (m *MemoryStorage) GetJobLog(ctx context.Context, jobID int) (*models.JobLo
 	}
 	copy := *entry
 	return &copy, nil
-}
-
-// ListJobsMissingLogs returns completed jobs of repoID whose log has not been archived yet,
-// newest completion first.
-func (m *MemoryStorage) ListJobsMissingLogs(ctx context.Context, repoID int, limit int) ([]models.WorkflowJob, error) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	candidates := make([]models.WorkflowJob, 0, 16)
-	for _, job := range m.jobs {
-		if job.Status != "completed" || job.CompletedAt == nil {
-			continue
-		}
-		run, ok := m.runs[job.RunID]
-		if !ok || run.RepoID != repoID {
-			continue
-		}
-		if _, archived := m.jobLogs[job.ID]; archived {
-			continue
-		}
-		candidates = append(candidates, *job)
-	}
-
-	sort.Slice(candidates, func(i, j int) bool {
-		return candidates[i].CompletedAt.After(*candidates[j].CompletedAt)
-	})
-	if len(candidates) > limit {
-		candidates = candidates[:limit]
-	}
-	return candidates, nil
 }

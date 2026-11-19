@@ -141,57 +141,6 @@ func TestJobLog_GetMissingReturnsError(t *testing.T) {
 	}
 }
 
-func TestJobLog_ListJobsMissingLogs(t *testing.T) {
-	s := newTestStorage()
-	repo, run := seedLogRun(t, s, seedUser(t, s, 1, "alice"), 900, 9100)
-	done1 := seedLogJob(t, s, run.ID, 911, true)
-	done2 := seedLogJob(t, s, run.ID, 912, true)
-	done3 := seedLogJob(t, s, run.ID, 913, true)
-	running := seedLogJob(t, s, run.ID, 914, false)
-	ctx := context.Background()
-
-	// Only done1 has its log stored.
-	content := []byte("done1\n")
-	if err := s.SaveJobLog(ctx, &models.JobLog{JobID: done1.ID, RunID: run.ID, Content: content, SizeBytes: len(content), FetchedAt: time.Now()}); err != nil {
-		t.Fatalf("SaveJobLog: %v", err)
-	}
-
-	missing, err := s.ListJobsMissingLogs(ctx, repo.ID, 100)
-	if err != nil {
-		t.Fatalf("ListJobsMissingLogs: %v", err)
-	}
-
-	got := make(map[int]bool, len(missing))
-	for _, j := range missing {
-		got[j.ID] = true
-	}
-	if got[done2.ID] == false || got[done3.ID] == false {
-		t.Errorf("missing logs must include completed jobs %d and %d, got %v", done2.ID, done3.ID, missing)
-	}
-	if got[done1.ID] {
-		t.Errorf("job %d already has a log and must not be listed", done1.ID)
-	}
-	if got[running.ID] {
-		t.Errorf("in-progress job %d must not be listed", running.ID)
-	}
-}
-
-func TestJobLog_ListJobsMissingLogs_RespectsLimit(t *testing.T) {
-	s := newTestStorage()
-	repo, run := seedLogRun(t, s, seedUser(t, s, 1, "alice"), 900, 9100)
-	seedLogJob(t, s, run.ID, 915, true)
-	seedLogJob(t, s, run.ID, 916, true)
-	seedLogJob(t, s, run.ID, 917, true)
-
-	missing, err := s.ListJobsMissingLogs(context.Background(), repo.ID, 2)
-	if err != nil {
-		t.Fatalf("ListJobsMissingLogs: %v", err)
-	}
-	if len(missing) != 2 {
-		t.Errorf("len(missing) = %d, want 2 (limit respected)", len(missing))
-	}
-}
-
 // bytesEqual compares two byte slices without importing bytes in every test body.
 func bytesEqual(a, b []byte) bool {
 	if len(a) != len(b) {

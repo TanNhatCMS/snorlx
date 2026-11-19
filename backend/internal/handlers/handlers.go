@@ -56,6 +56,9 @@ type Handler struct {
 	// wakeActive and wakeDiscovery make the poll loops run early when a page becomes visible.
 	wakeActive    chan struct{}
 	wakeDiscovery chan struct{}
+	// backfillMaxLogFetches caps the log-fetch attempts one backfill call spends; 0 means the
+	// default (used by tests that build a Handler literal).
+	backfillMaxLogFetches int
 }
 
 // New creates a new Handler
@@ -70,6 +73,8 @@ func New(cfg *config.Config, store storage.Storage, ghClient *github.Client, wsH
 		etags:         newETagCache(),
 		wakeActive:    make(chan struct{}, 1),
 		wakeDiscovery: make(chan struct{}, 1),
+
+		backfillMaxLogFetches: defaultBackfillMaxLogFetches,
 	}
 	if wsHub != nil {
 		wsHub.SetActivationListener(h.UserActivated)

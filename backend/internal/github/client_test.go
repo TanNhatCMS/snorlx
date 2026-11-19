@@ -577,3 +577,33 @@ func TestGetWorkflowJobLogs_WrapsStatusCodeError(t *testing.T) {
 		t.Fatal("StatusCodeError must wrap the underlying error")
 	}
 }
+
+// IsRateLimit gom một chỗ việc nhận diện rate limit: go-github RateLimitError,
+// AbuseRateLimitError, và StatusCodeError với status 403/429 (log endpoints trả lỗi thường).
+func TestIsRateLimit(t *testing.T) {
+	rateErr := &ghLib.RateLimitError{Rate: ghLib.Rate{Limit: 5000, Remaining: 0}}
+	abuseErr := &ghLib.AbuseRateLimitError{}
+	status403 := &StatusCodeError{StatusCode: 403, Err: errors.New("403")}
+	status429 := &StatusCodeError{StatusCode: 429, Err: errors.New("429")}
+	status500 := &StatusCodeError{StatusCode: 500, Err: errors.New("500")}
+
+	cases := []struct {
+		err  error
+		want bool
+	}{
+		{rateErr, true},
+		{abuseErr, true},
+		{fmt.Errorf("wrapped: %w", rateErr), true},
+		{status403, true},
+		{status429, true},
+		{fmt.Errorf("wrapped: %w", status429), true},
+		{status500, false},
+		{errors.New("some other failure"), false},
+		{nil, false},
+	}
+	for _, tc := range cases {
+		if got := IsRateLimit(tc.err); got != tc.want {
+			t.Errorf("IsRateLimit(%T %v) = %v, want %v", tc.err, tc.err, got, tc.want)
+		}
+	}
+}

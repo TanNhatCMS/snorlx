@@ -53,7 +53,6 @@ type mockStorage struct {
 	saveJobLogFunc          func(ctx context.Context, entry *models.JobLog) error
 	hasJobLogFunc           func(ctx context.Context, jobID int) (bool, error)
 	getJobLogFunc           func(ctx context.Context, jobID int) (*models.JobLog, error)
-	listJobsMissingLogsFunc func(ctx context.Context, repoID int, limit int) ([]models.WorkflowJob, error)
 	getJobFunc              func(ctx context.Context, id int) (*models.WorkflowJob, error)
 	listRunsFunc            func(ctx context.Context, userID int, filters *models.RunFilters, page, pageSize int) ([]models.WorkflowRun, int, error)
 }
@@ -77,12 +76,6 @@ func (m *mockStorage) GetJobLog(ctx context.Context, jobID int) (*models.JobLog,
 		return m.getJobLogFunc(ctx, jobID)
 	}
 	return nil, errors.New("job log not found")
-}
-func (m *mockStorage) ListJobsMissingLogs(ctx context.Context, repoID int, limit int) ([]models.WorkflowJob, error) {
-	if m.listJobsMissingLogsFunc != nil {
-		return m.listJobsMissingLogsFunc(ctx, repoID, limit)
-	}
-	return nil, nil
 }
 func (m *mockStorage) Ping(ctx context.Context) error {
 	if m.pingFunc != nil {

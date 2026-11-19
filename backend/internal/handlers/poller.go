@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"sort"
@@ -10,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"snorlx/backend/internal/github"
 	"snorlx/backend/internal/models"
 
 	gh "github.com/google/go-github/v93/github"
@@ -596,10 +596,8 @@ func stateOf(run *models.WorkflowRun) runState {
 // only that scope is retried with the next user. Anything else is transient and waits for the
 // next pass.
 func (h *Handler) notePollError(clients *passClients, userID int, scope string, err error, what, repo string) (tryNextUser bool) {
-	var rateErr *gh.RateLimitError
-	var abuseErr *gh.AbuseRateLimitError
 	switch status := gitHubStatus(err); {
-	case errors.As(err, &rateErr), errors.As(err, &abuseErr):
+	case github.IsRateLimit(err):
 		clients.markFailed(userID)
 		log.Warn().Err(err).Int("user_id", userID).Msg("Live poller: GitHub rate limit reached, pausing this token until the next pass")
 		return true

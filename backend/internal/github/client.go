@@ -513,6 +513,26 @@ type StatusCodeError struct {
 func (e *StatusCodeError) Error() string { return e.Err.Error() }
 func (e *StatusCodeError) Unwrap() error { return e.Err }
 
+// IsRateLimit reports whether err is a GitHub rate-limit rejection in any shape the API
+// surfaces: go-github's *RateLimitError / *AbuseRateLimitError, or a StatusCodeError with
+// 403/429 from the log-download endpoints (which answer plain errors instead).
+// Safe on nil.
+func IsRateLimit(err error) bool {
+	if err == nil {
+		return false
+	}
+	var rlErr *github.RateLimitError
+	var abuseErr *github.AbuseRateLimitError
+	var scErr *StatusCodeError
+	if errors.As(err, &rlErr) || errors.As(err, &abuseErr) {
+		return true
+	}
+	if errors.As(err, &scErr) && (scErr.StatusCode == http.StatusForbidden || scErr.StatusCode == http.StatusTooManyRequests) {
+		return true
+	}
+	return false
+}
+
 // wrapStatusCode attaches the HTTP status (when the response carries one) to an error.
 func wrapStatusCode(err error, resp *github.Response) error {
 	if err == nil {
