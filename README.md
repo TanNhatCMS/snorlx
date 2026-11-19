@@ -343,7 +343,7 @@ curl -X POST -H "Authorization: Bearer <api-token>" http://localhost:8080/api/re
 
 Endpoint này đi qua các run hoàn tất của repository trong khoảng retention của GitHub, bỏ qua
 job đã archive, và xử lý tối đa 500 run mỗi lần gọi — gọi lại để xử lý tiếp. Khi GitHub trả
-403/429 rate limit, pass dừng ngay và  báo cho caller biết nên chờ trước
+403/429 rate limit, pass dừng ngay và `rate_limited: true` báo cho caller biết nên chờ trước
 khi gọi tiếp.
 
 ## Cấu hình
